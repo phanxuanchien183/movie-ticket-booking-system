@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Movie, Showtime, Seat, SeatGeometricView, Booking } from '@/types';
+import { Movie, Showtime, Seat, SeatGeometricView, Booking, EntertainmentEvent } from '@/types';
 import { Navbar } from '@/components/Navbar';
 import { MovieSelector } from '@/components/MovieSelector';
 import { ShowtimeSelector } from '@/components/ShowtimeSelector';
@@ -37,8 +37,8 @@ export default function Home() {
     setCurrentUserId(stored);
   }, []);
 
-  const [movies, setMovies] = useState<Movie[]>([]);
-  const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
+  const [movies, setMovies] = useState<EntertainmentEvent[]>([]);
+  const [selectedMovie, setSelectedMovie] = useState<EntertainmentEvent | null>(null);
 
   const [showtimes, setShowtimes] = useState<Showtime[]>([]);
   const [selectedShowtime, setSelectedShowtime] = useState<Showtime | null>(null);
@@ -292,7 +292,7 @@ export default function Home() {
         <section>
           <MovieSelector
             movies={movies}
-            selectedMovieId={selectedMovie?.movie_id || 0}
+            selectedMovieId={selectedMovie?.event_id || selectedMovie?.movie_id || 0}
             onSelectMovie={(m) => {
               setSelectedMovie(m);
             }}
@@ -341,6 +341,7 @@ export default function Home() {
                 onToggleSeat={handleToggleSeat}
                 onOpenSeatView={(s) => setViewingSeat(s)}
                 lockTimeRemaining={lockTimeRemaining}
+                isConcert={Boolean(selectedShowtime.room?.is_concert_stage || selectedMovie?.category === 'concert' || selectedMovie?.category === 'meeting')}
               />
             </div>
           </section>
@@ -384,6 +385,7 @@ export default function Home() {
           seat={viewingSeat}
           movieTitle={selectedMovie?.title}
           roomName={selectedShowtime?.room?.room_name}
+          isConcert={Boolean(selectedShowtime?.room?.is_concert_stage || selectedMovie?.category === 'concert' || selectedMovie?.category === 'meeting')}
           isSelected={selectedSeatIds.includes(viewingSeat.seat_id)}
           onClose={() => setViewingSeat(null)}
           onSelectSeat={(seatId) => {

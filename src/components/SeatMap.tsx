@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Seat, SeatGeometricView } from '@/types';
-import { Eye, Lock, Check, Clock } from 'lucide-react';
+import { Eye, Lock, Check, Clock, Music, Monitor } from 'lucide-react';
 
 interface SeatWithView extends Seat {
   view_metrics?: SeatGeometricView;
@@ -15,6 +15,7 @@ interface SeatMapProps {
   onToggleSeat: (seat: SeatWithView) => void;
   onOpenSeatView: (seat: SeatWithView) => void;
   lockTimeRemaining?: number | null; // seconds
+  isConcert?: boolean;
 }
 
 export const SeatMap: React.FC<SeatMapProps> = ({
@@ -24,8 +25,8 @@ export const SeatMap: React.FC<SeatMapProps> = ({
   onToggleSeat,
   onOpenSeatView,
   lockTimeRemaining,
+  isConcert = false,
 }) => {
-  // Nhóm ghế theo từng hàng
   const rowsMap = new Map<string, SeatWithView[]>();
   seats.forEach((seat) => {
     if (!rowsMap.has(seat.row_name)) {
@@ -36,7 +37,6 @@ export const SeatMap: React.FC<SeatMapProps> = ({
 
   const rowNames = Array.from(rowsMap.keys()).sort();
 
-  // Đếm thời gian giữ vé
   const [timer, setTimer] = useState<number | null>(lockTimeRemaining || null);
 
   useEffect(() => {
@@ -59,7 +59,6 @@ export const SeatMap: React.FC<SeatMapProps> = ({
     return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   };
 
-  // State xem chi tiết ghế khi click
   const [hoveredSeat, setHoveredSeat] = useState<SeatWithView | null>(null);
 
   return (
@@ -70,7 +69,7 @@ export const SeatMap: React.FC<SeatMapProps> = ({
           <div className="flex items-center space-x-2">
             <Clock className="w-4 h-4 text-amber-400 shrink-0" />
             <span className="text-xs sm:text-sm font-medium">
-              Ghế đang được giữ tạm thời. Vui lòng hoàn tất đặt vé trong:
+              Vé đang được giữ độc quyền cho bạn. Vui lòng hoàn tất trong:
             </span>
           </div>
           <span className="text-base sm:text-lg font-mono font-black text-amber-300 bg-amber-500/20 px-2.5 py-0.5 rounded-lg border border-amber-500/40">
@@ -79,15 +78,30 @@ export const SeatMap: React.FC<SeatMapProps> = ({
         </div>
       )}
 
-      {/* Screen Visualizer */}
+      {/* Stage / Screen Representation */}
       <div className="relative pt-4 pb-6 text-center">
         <div className="relative mx-auto max-w-xl">
-          {/* Curved Screen */}
-          <div className="h-2 rounded-full bg-gradient-to-r from-transparent via-emerald-400 to-transparent shadow-[0_0_25px_#10b981] mx-6" />
-          <div className="mt-2 text-[11px] font-bold tracking-[0.3em] text-slate-400 uppercase">
-            Màn Hình Chiếu
-          </div>
-          <div className="absolute top-2 left-1/2 -translate-x-1/2 w-3/4 h-16 bg-gradient-to-b from-emerald-500/10 to-transparent pointer-events-none blur-lg" />
+          {isConcert ? (
+            <div>
+              {/* Concert Main Stage */}
+              <div className="h-4 rounded-xl bg-gradient-to-r from-rose-500 via-amber-400 to-rose-500 shadow-[0_0_30px_#f43f5e] mx-4 flex items-center justify-center text-[10px] font-black text-slate-950 uppercase tracking-widest">
+                ★ SÂN KHẤU CHÍNH (MAIN STAGE) ★
+              </div>
+              <div className="mt-2 text-[11px] font-bold tracking-[0.2em] text-slate-400 uppercase">
+                Nhà Thi Đấu / Khán Đài Sân Khấu
+              </div>
+              <div className="absolute top-2 left-1/2 -translate-x-1/2 w-3/4 h-20 bg-gradient-to-b from-rose-500/15 to-transparent pointer-events-none blur-xl" />
+            </div>
+          ) : (
+            <div>
+              {/* Cinema Curved Screen */}
+              <div className="h-2 rounded-full bg-gradient-to-r from-transparent via-emerald-400 to-transparent shadow-[0_0_25px_#10b981] mx-6" />
+              <div className="mt-2 text-[11px] font-bold tracking-[0.3em] text-slate-400 uppercase">
+                Màn Hình Chiếu Rạp
+              </div>
+              <div className="absolute top-2 left-1/2 -translate-x-1/2 w-3/4 h-16 bg-gradient-to-b from-emerald-500/10 to-transparent pointer-events-none blur-lg" />
+            </div>
+          )}
         </div>
       </div>
 
@@ -100,37 +114,41 @@ export const SeatMap: React.FC<SeatMapProps> = ({
 
             return (
               <div key={rowName} className="flex items-center justify-center space-x-2">
-                {/* Row Header Left */}
                 <span className="w-5 text-xs font-bold text-slate-500 text-center">
                   {rowName}
                 </span>
 
-                {/* Seats in Row */}
                 <div className="flex items-center space-x-1.5 sm:space-x-2">
                   {rowSeats.map((seat) => {
                     const isSelected = selectedSeatIds.includes(seat.seat_id);
                     const isBooked = seat.status === 'booked';
-                    // Ghế đang bị người dùng khác giữ chỗ
                     const isLockedByOther =
                       seat.status === 'locked' && seat.locked_by_user !== currentUserId;
                     const isSweetbox = seat.seat_type === 'Sweetbox';
+                    const isVVIP = seat.seat_type === 'VVIP_Stage';
                     const isVIP = seat.seat_type === 'VIP';
+                    const isCAT1 = seat.seat_type === 'CAT1';
 
-                    // Seat Styling (Ticketbox style)
-                    let seatColorClass = 'bg-slate-800 text-slate-300 border-slate-700 hover:border-slate-500 hover:bg-slate-750';
+                    let seatColorClass = 'bg-slate-800 text-slate-300 border-slate-700 hover:border-slate-500';
                     if (isBooked) {
                       seatColorClass = 'bg-slate-900/60 text-slate-600 border-slate-800 cursor-not-allowed opacity-30';
                     } else if (isLockedByOther) {
-                      seatColorClass = 'bg-amber-950/70 text-amber-400 border-amber-600/70 cursor-not-allowed opacity-90';
+                      seatColorClass = 'bg-amber-950/70 text-amber-400 border-amber-600/70 cursor-not-allowed';
                     } else if (isSelected) {
                       seatColorClass =
                         'bg-emerald-500 text-slate-950 border-emerald-400 font-bold shadow-md shadow-emerald-500/30 scale-105';
+                    } else if (isVVIP) {
+                      seatColorClass =
+                        'bg-rose-950/50 text-rose-300 border-rose-600/70 hover:border-rose-400';
+                    } else if (isVIP) {
+                      seatColorClass =
+                        'bg-amber-950/40 text-amber-300 border-amber-700/60 hover:border-amber-500';
+                    } else if (isCAT1) {
+                      seatColorClass =
+                        'bg-indigo-950/40 text-indigo-300 border-indigo-700/60 hover:border-indigo-500';
                     } else if (isSweetbox) {
                       seatColorClass =
                         'bg-pink-950/40 text-pink-300 border-pink-700/60 hover:border-pink-500';
-                    } else if (isVIP) {
-                      seatColorClass =
-                        'bg-amber-950/30 text-amber-300 border-amber-700/60 hover:border-amber-500';
                     }
 
                     return (
@@ -151,7 +169,7 @@ export const SeatMap: React.FC<SeatMapProps> = ({
                               ? `Ghế ${seat.seat_id} (Đã bán)`
                               : isLockedByOther
                               ? `Ghế ${seat.seat_id} (Đang có người giữ chỗ)`
-                              : `Ghế ${seat.seat_id} • ${seat.seat_type} • ${seat.price?.toLocaleString('vi-VN')} đ`
+                              : `Ghế ${seat.seat_id} • ${seat.zone_name || seat.seat_type} • ${seat.price?.toLocaleString('vi-VN')} đ`
                           }
                         >
                           {isBooked ? (
@@ -169,7 +187,6 @@ export const SeatMap: React.FC<SeatMapProps> = ({
                   })}
                 </div>
 
-                {/* Row Header Right */}
                 <span className="w-5 text-xs font-bold text-slate-500 text-center">
                   {rowName}
                 </span>
@@ -179,17 +196,17 @@ export const SeatMap: React.FC<SeatMapProps> = ({
         </div>
       </div>
 
-      {/* Hover Seat Details & Quick View Action Banner */}
-      <div className="flex flex-col sm:flex-row items-center justify-between p-3 rounded-xl bg-slate-950/80 border border-slate-800 text-xs text-slate-400 gap-3">
+      {/* Hover Seat Details & Action */}
+      <div className="flex flex-col sm:flex-row items-center justify-between p-3.5 rounded-xl bg-slate-950/80 border border-slate-800 text-xs text-slate-400 gap-3">
         {hoveredSeat ? (
           <div className="flex items-center space-x-3">
             <span className="font-bold text-white text-sm">
-              Ghế {hoveredSeat.seat_id}
+              {hoveredSeat.seat_id}
             </span>
-            <span className="px-2 py-0.5 rounded bg-slate-800 text-slate-300">
-              {hoveredSeat.seat_type}
+            <span className="px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-medium">
+              {hoveredSeat.zone_name || hoveredSeat.seat_type}
             </span>
-            <span className="text-emerald-400 font-semibold">
+            <span className="text-emerald-400 font-bold text-sm">
               {hoveredSeat.price?.toLocaleString('vi-VN')} đ
             </span>
             {hoveredSeat.status === 'locked' && hoveredSeat.locked_by_user !== currentUserId && (
@@ -202,7 +219,7 @@ export const SeatMap: React.FC<SeatMapProps> = ({
             )}
           </div>
         ) : (
-          <span>Di chuột hoặc chạm vào ghế để xem chi tiết giá và loại ghế</span>
+          <span>Di chuột hoặc chạm vào vị trí ghế để xem khu vực và giá vé</span>
         )}
 
         {hoveredSeat && (
@@ -211,25 +228,49 @@ export const SeatMap: React.FC<SeatMapProps> = ({
             className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-medium transition-colors"
           >
             <Eye className="w-3.5 h-3.5 text-emerald-400" />
-            <span>Xem góc nhìn từ ghế {hoveredSeat.seat_id}</span>
+            <span>Xem góc nhìn tới {isConcert ? 'Sân khấu' : 'Màn chiếu'}</span>
           </button>
         )}
       </div>
 
       {/* Legend & Price Guide */}
       <div className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800 flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-xs text-slate-300">
-        <div className="flex items-center space-x-1.5">
-          <div className="w-3.5 h-3.5 rounded bg-slate-800 border border-slate-600" />
-          <span>Ghế Thường</span>
-        </div>
-        <div className="flex items-center space-x-1.5">
-          <div className="w-3.5 h-3.5 rounded bg-amber-950/40 border border-amber-600/60" />
-          <span>Ghế VIP</span>
-        </div>
-        <div className="flex items-center space-x-1.5">
-          <div className="w-5 h-3.5 rounded bg-pink-950/40 border border-pink-700/60" />
-          <span>Ghế Đôi</span>
-        </div>
+        {isConcert ? (
+          <>
+            <div className="flex items-center space-x-1.5">
+              <div className="w-3.5 h-3.5 rounded bg-rose-950/60 border border-rose-600/80" />
+              <span>VVIP Sân Khấu</span>
+            </div>
+            <div className="flex items-center space-x-1.5">
+              <div className="w-3.5 h-3.5 rounded bg-amber-950/40 border border-amber-600/60" />
+              <span>VIP Trung Tâm</span>
+            </div>
+            <div className="flex items-center space-x-1.5">
+              <div className="w-3.5 h-3.5 rounded bg-indigo-950/40 border border-indigo-700/60" />
+              <span>Khán Đài CAT 1</span>
+            </div>
+            <div className="flex items-center space-x-1.5">
+              <div className="w-3.5 h-3.5 rounded bg-slate-800 border border-slate-600" />
+              <span>Khán Đài CAT 2</span>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="flex items-center space-x-1.5">
+              <div className="w-3.5 h-3.5 rounded bg-slate-800 border border-slate-600" />
+              <span>Ghế Thường</span>
+            </div>
+            <div className="flex items-center space-x-1.5">
+              <div className="w-3.5 h-3.5 rounded bg-amber-950/40 border border-amber-600/60" />
+              <span>Ghế VIP</span>
+            </div>
+            <div className="flex items-center space-x-1.5">
+              <div className="w-5 h-3.5 rounded bg-pink-950/40 border border-pink-700/60" />
+              <span>Ghế Đôi Sweetbox</span>
+            </div>
+          </>
+        )}
+
         <div className="flex items-center space-x-1.5">
           <div className="w-3.5 h-3.5 rounded bg-emerald-500 border border-emerald-400" />
           <span className="text-emerald-400 font-semibold">Đang chọn</span>

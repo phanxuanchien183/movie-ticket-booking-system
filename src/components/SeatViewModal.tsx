@@ -11,15 +11,17 @@ interface SeatViewModalProps {
   onClose: () => void;
   onSelectSeat?: (seatId: string) => void;
   isSelected?: boolean;
+  isConcert?: boolean;
 }
 
 export const SeatViewModal: React.FC<SeatViewModalProps> = ({
   seat,
-  movieTitle = 'Phim Chiếu Rạp',
+  movieTitle = 'Sự Kiện Trực Tuyến',
   roomName = 'Laser IMAX Starlight',
   onClose,
   onSelectSeat,
   isSelected,
+  isConcert = false,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -188,14 +190,14 @@ export const SeatViewModal: React.FC<SeatViewModalProps> = ({
             />
             <div className="absolute bottom-3 left-3 bg-slate-950/80 backdrop-blur-md px-3 py-1 rounded-lg text-xs text-slate-300 border border-slate-800 flex items-center space-x-1.5">
               <Compass className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Góc nhìn mô phỏng từ ghế {seat.seat_id} tới màn chiếu</span>
+              <span>Góc nhìn mô phỏng từ ghế {seat.seat_id} tới {isConcert ? 'sân khấu chính' : 'màn chiếu'}</span>
             </div>
           </div>
 
           {/* Quick Metrics */}
           <div className="grid grid-cols-3 gap-3 text-center">
             <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800/80">
-              <span className="text-xs text-slate-400 block mb-0.5">Khoảng cách tới màn hình</span>
+              <span className="text-xs text-slate-400 block mb-0.5">Khoảng cách tới {isConcert ? 'sân khấu' : 'màn hình'}</span>
               <span className="text-lg font-bold text-white">
                 {metrics?.distance_to_screen || 0} <span className="text-xs text-slate-500 font-normal">mét</span>
               </span>

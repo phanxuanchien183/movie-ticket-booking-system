@@ -68,3 +68,4 @@ describe('ShowtimeSelector Component', () => {
     expect(handleSelect).toHaveBeenCalledWith(mockShowtimes[1]);
   });
 });
+

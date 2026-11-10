@@ -69,3 +69,4 @@ describe('SeatLockService (High-Concurrency Seat Locking)', () => {
     expect(locks.has('TEST-A01')).toBe(false);
   });
 });
+

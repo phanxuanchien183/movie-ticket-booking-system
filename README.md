@@ -1,5 +1,5 @@
-# 🎬 CineTicket Pro - Movie & Event Ticket Booking System
-### Hệ Thống Đặt Vé Xem Phim & Sự Kiện Trực Tuyến Thời Gian Thực (Fullstack Next.js)
+# 🎬 CineTicket Pro - Movie & Concert Ticket Booking Marketplace
+### Nền Tảng Thương Mại Đặt Vé Xem Phim & Concert Thời Gian Thực (Fullstack Next.js)
 
 [![Next.js](https://img.shields.io/badge/Next.js-16.4+-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
 [![React](https://img.shields.io/badge/React-19-blue?style=for-the-badge&logo=react)](https://react.dev/)
@@ -7,30 +7,34 @@
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4-38B2AC?style=for-the-badge&logo=tailwind-css)](https://tailwindcss.com/)
 [![Redis](https://img.shields.io/badge/Redis-Locking_TTL-DC382D?style=for-the-badge&logo=redis)](https://redis.io/)
 [![MySQL](https://img.shields.io/badge/MySQL-8.0_InnoDB-4479A1?style=for-the-badge&logo=mysql)](https://www.mysql.com/)
-[![Zod](https://img.shields.io/badge/Zod-Type_Safety-3068B7?style=for-the-badge&logo=zod)](https://zod.dev/)
+[![Tests](https://img.shields.io/badge/Tests-25%20Passing-brightgreen?style=for-the-badge&logo=vitest)](https://vitest.dev/)
 
 ---
 
 ## 🌟 Giới Thiệu Tổng Quan (Overview)
 
-**CineTicket Pro** là giải pháp phần mềm đặt vé xem phim và sự kiện cao cấp được thiết kế theo kiến trúc **Next.js Fullstack Monolithic** (App Router). Hệ thống giải quyết các bài toán kỹ thuật phức tạp nhất trong ngành bán vé trực tuyến:
+**CineTicket Pro** là nền tảng thương mại điện tử đặt vé đa ngành (Ticketing Marketplace) tương tự mô hình **Ticketbox** và **CGV Cinemas**, xây dựng trên nền tảng **Next.js Fullstack Monolithic** (App Router). Hệ thống hỗ trợ song hành hai mô hình bán vé chủ lực:
 
-1. **Khóa ghế thời gian thực chống Double-Booking:** Sử dụng cơ chế phân tán **Redis Key-Value với TTL 300s (5 phút)** và lệnh nguyên tử `SET NX EX`.
-2. **Động cơ mô phỏng góc nhìn rạp chiếu (Seat View Engine):** Tính toán lượng giác từ tọa độ không gian 3D thực tế $(X, Y, Z)$ của ghế đến màn hình cong IMAX để dựng hình ảnh phối cảnh và xếp hạng góc nhìn (5 sao).
+1. **Vé xem phim tại các cụm rạp hàng đầu:** CGV Cinemas, Lotte Cinema, BHD Star, Galaxy Cinema (Màn hình cong IMAX, Sweetbox, VIP).
+2. **Vé Live Concert, Fan Meeting & Sự kiện tại các nhà thi đấu, sân vận động:** Nhà thi đấu Phú Thọ, Quân khu 7, Trung tâm Hội nghị Quốc gia NCC, SVĐ Mỹ Đình (Khán đài Sân khấu Arena 360°, VVIP Stage, Fanzone, CAT 1, CAT 2).
+
+### Các Trụ Cột Kỹ Thuật Đột Phá:
+1. **Khóa ghế thời gian thực chống Double-Booking (Redis Seat Locking):** Sử dụng cơ chế phân tán **Redis Key-Value với TTL 300s (5 phút)** và lệnh nguyên tử `SET NX EX`. Khi người dùng A giữ ghế ở một khung giờ, người dùng B ở phiên khác lập tức thấy ghế chuyển sang trạng thái đã được giữ chỗ.
+2. **Động cơ mô phỏng góc nhìn rạp & khán đài (Seat View Engine):** Tính toán lượng giác từ tọa độ không gian 3D thực tế $(X, Y, Z)$ của ghế đến màn hình cong IMAX hoặc sân khấu chính để dựng hình ảnh phối cảnh và xếp hạng góc nhìn (5 sao).
 3. **Chính sách khuyến mãi ràng buộc ngân hàng nghiêm ngặt (Bank Binding Check):** Chống gian lận voucher, bắt buộc đối chiếu phương thức thanh toán của ngân hàng tài trợ (VD: Mã `ACB50` bắt buộc thanh toán qua Ngân hàng ACB).
-4. **Trải nghiệm giao diện điện ảnh mượt mà:** Xây dựng bằng Tailwind CSS v4, Canvas/SVG, đồng hồ đếm ngược 5:00 phút trực quan, hiệu ứng pháo hoa chúc mừng và vé điện tử E-Ticket kèm mã QR.
+4. **Trải nghiệm thương mại phong cách Ticketbox:** Giao diện tối giản sang trọng, phân loại theo sự kiện/ca sĩ/rạp, đồng hồ đếm ngược 5:00 phút trực quan, vé điện tử E-Ticket kèm mã QR.
 
 ---
 
 ## 🏗️ Kiến Trúc Hệ Thống (Architecture Flow)
 
-```
-[ Browser / Khách Hàng ]
-       │
-       ▼ (HTTP / JSON)
+```text
+[ Trình Duyệt Khách Hàng (User A / User B) ]
+       │  ▲  (Heartbeat Polling đồng bộ ghế thời gian thực 2.5s)
+       ▼  │
 [ Next.js 16 Fullstack App Router ]
- ├── UI Layer: MovieSelector, ShowtimeSelector, SeatMap, SeatViewModal, CheckoutDrawer
- ├── API Handlers: /api/movies, /api/showtimes, /api/seats/lock, /api/promotions/validate, /api/bookings/checkout
+ ├── UI Layer: MovieSelector (Tabs: Phim / Concert / Meeting), ShowtimeSelector, SeatMap, SeatViewModal, CheckoutDrawer
+ ├── API Handlers: /api/movies, /api/showtimes, /api/seats/lock, /api/seats/release, /api/promotions/validate, /api/bookings/checkout
  ├── Zod Validation Schemas
  └── Domain Services: SeatLockService, PromotionService, SeatViewEngine
        │                                     │
@@ -54,7 +58,7 @@
   $$\text{Distance} = \sqrt{\left(X_{\text{seat}} - \frac{\text{screenWidth}}{2}\right)^2 + Y_{\text{seat}}^2}$$
 * **Góc lệch ngang:**
   $$\text{Angle} = \arctan\left(\frac{X_{\text{seat}} - \frac{\text{screenWidth}}{2}}{Y_{\text{seat}}}\right) \times \frac{180}{\pi}$$
-* **Canvas Renderer:** Vẽ màn hình cong IMAX phát sáng với điểm tụ (Vanishing Point) dịch chuyển tương ứng theo góc lệch và độ cao sàn $Z$.
+* **Canvas Renderer:** Vẽ màn hình cong IMAX phát sáng hoặc sân khấu chính với điểm tụ (Vanishing Point) dịch chuyển tương ứng theo góc lệch và độ cao sàn $Z$.
 * **Đánh giá tự động:** Xếp hạng 5 sao cho Ghế trung tâm Hoàng Kim, cảnh báo nếu ghế ở quá sát màn hình hoặc góc nghiêng lớn.
 
 ### 3. Ràng Buộc Thanh Toán Ngân Hàng (Bank Binding Promotions)
@@ -62,10 +66,10 @@
 * **Đối chiếu mã ngân hàng:** Nếu `promotions.bank_code = 'ACB'`, chỉ chấp nhận phương thức thanh toán `ACB_CREDIT` hoặc `ACB_QR`. Từ chối mọi phương thức khác (`INVALID_BANK_PAYMENT_METHOD`).
 * Tự động tính phần trăm giảm giá có chặn trần tối đa (`max_discount_amount`).
 
-### 4. Vé Điện Tử & Mã QR Vào Rạp (E-Ticket)
+### 4. Vé Điện Tử & Mã QR Vào Cổng (E-Ticket)
 * Cấp mã đơn hàng duy nhất dạng `BK-XXXXXX-YYYYYY`.
-* Chuỗi bảo mật QR Code `TICKET:{bookingId}:ST{showtimeId}:{seats}` để nhân viên rạp quét vé tại cổng.
-* Tích hợp tính năng In vé và Tải vé.
+* Chuỗi bảo mật QR Code `TICKET:{bookingId}:ST{showtimeId}:{seats}` để ban tổ chức và cụm rạp quét vé tại cổng kiểm soát.
+* Tích hợp tính năng In vé và Tải vé điện tử.
 
 ---
 
@@ -75,33 +79,34 @@
 movie-ticket-booking/
 ├── schema/sql/                     # DDL & Data Seeding cho MySQL
 │   ├── 01_init_rooms_and_seats.sql # Phòng chiếu & sơ đồ ghế 3D (X, Y, Z)
-│   ├── 02_init_movies_and_showtimes.sql # Phim & suất chiếu
+│   ├── 02_init_movies_and_showtimes.sql # Phim, concert & suất chiếu
 │   ├── 03_init_promotions_and_pricing.sql # Giá vé linh hoạt & mã ưu đãi
 │   ├── 04_init_bookings.sql        # Đơn đặt vé & chi tiết ghế
-│   └── 05_seed_data.sql            # Dữ liệu mẫu rạp IMAX, phim, suất chiếu
+│   └── 05_seed_data.sql            # Dữ liệu mẫu rạp IMAX, nhà thi đấu, concert
 ├── src/
 │   ├── app/
 │   │   ├── api/                    # Route Handlers Next.js
-│   │   │   ├── movies/             # GET danh sách phim
+│   │   │   ├── movies/             # GET danh sách phim & concert (?category=)
 │   │   │   ├── showtimes/          # GET suất chiếu & sơ đồ ghế
 │   │   │   ├── seats/lock/         # POST khóa ghế qua Redis
 │   │   │   ├── seats/release/      # POST giải phóng ghế
 │   │   │   ├── promotions/validate/# POST validate mã ưu đãi ngân hàng
 │   │   │   └── bookings/checkout/  # POST checkout & xuất vé
+│   │   ├── admin/                  # Dashboard quản trị Redis khóa ghế
 │   │   ├── layout.tsx              # Root HTML & Metadata
 │   │   └── page.tsx                # Trang chủ ứng dụng đặt vé
 │   ├── components/                 # Các UI Component
-│   │   ├── Navbar.tsx              # Thanh điều hướng & Stepper tiến trình
-│   │   ├── MovieSelector.tsx       # Lựa chọn phim
-│   │   ├── ShowtimeSelector.tsx    # Chọn khung giờ & định dạng (IMAX 2D...)
-│   │   ├── SeatMap.tsx             # Sơ đồ ghế SVG tương tác & timer
-│   │   ├── SeatViewModal.tsx       # Canvas 3D mô phỏng góc nhìn rạp
+│   │   ├── Navbar.tsx              # Thanh điều hướng thương mại phong cách Ticketbox
+│   │   ├── MovieSelector.tsx       # Lựa chọn sự kiện (Phim / Concert / Meeting)
+│   │   ├── ShowtimeSelector.tsx    # Khung giờ & định dạng (IMAX 2D, Live 360°...)
+│   │   ├── SeatMap.tsx             # Sơ đồ ghế thích ứng (Rạp chiếu & Khán đài Arena)
+│   │   ├── SeatViewModal.tsx       # Canvas 3D mô phỏng góc nhìn rạp & sân khấu
 │   │   ├── CheckoutDrawer.tsx      # Form thanh toán & kiểm tra ngân hàng
 │   │   └── TicketSuccessModal.tsx  # Modal vé điện tử & mã QR
 │   ├── lib/
 │   │   ├── db.ts                   # mysql2 connection pool + In-Memory Fallback
 │   │   ├── redis.ts                # ioredis client + In-Memory TTL Lock
-│   │   └── seat-view-engine.ts     # Công thức hình học tọa độ & góc nhìn
+│   │   └── seat-view-engine.ts     # Công thức hình học lượng giác
 │   ├── schemas/                    # Zod validation schemas
 │   ├── services/                   # Business domain services
 │   └── types/                      # TypeScript definitions
@@ -163,7 +168,7 @@ Dự án áp dụng chính sách **Bắt buộc 100% kiểm thử (Mandatory Tes
 * **UI Components:** [`SeatMap.test.tsx`](file:///D:/source/movie-ticket-booking/src/components/__tests__/SeatMap.test.tsx), [`ShowtimeSelector.test.tsx`](file:///D:/source/movie-ticket-booking/src/components/__tests__/ShowtimeSelector.test.tsx), [`MovieSelector.test.tsx`](file:///D:/source/movie-ticket-booking/src/components/__tests__/MovieSelector.test.tsx).
 
 ```bash
-# Chạy toàn bộ 22/22 test cases
+# Chạy toàn bộ 25/25 test cases
 npm test
 
 # Chạy test ở chế độ theo dõi (Watch mode)

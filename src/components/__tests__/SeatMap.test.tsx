@@ -95,4 +95,35 @@ describe('SeatMap Component (Seat Statuses & Selection)', () => {
     fireEvent.click(bookedSeat);
     expect(handleToggle).not.toHaveBeenCalled();
   });
+
+  it('Hiển thị sân khấu hòa nhạc khi isConcert = true và màn hình rạp khi isConcert = false', () => {
+    const handleToggle = vi.fn();
+    const handleOpenView = vi.fn();
+
+    const { rerender } = render(
+      <SeatMap
+        seats={mockSeats}
+        selectedSeatIds={[]}
+        currentUserId="test_guest"
+        isConcert={true}
+        onToggleSeat={handleToggle}
+        onOpenSeatView={handleOpenView}
+      />
+    );
+
+    expect(screen.getByText('★ SÂN KHẤU CHÍNH (MAIN STAGE) ★')).toBeDefined();
+
+    rerender(
+      <SeatMap
+        seats={mockSeats}
+        selectedSeatIds={[]}
+        currentUserId="test_guest"
+        isConcert={false}
+        onToggleSeat={handleToggle}
+        onOpenSeatView={handleOpenView}
+      />
+    );
+
+    expect(screen.getByText('Màn Hình Chiếu Rạp')).toBeDefined();
+  });
 });

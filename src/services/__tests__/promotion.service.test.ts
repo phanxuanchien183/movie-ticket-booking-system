@@ -56,3 +56,4 @@ describe('PromotionService (Bank Binding & Discount Logic)', () => {
     expect(resVnpay.valid).toBe(true);
   });
 });
+

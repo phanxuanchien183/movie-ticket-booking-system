@@ -60,3 +60,4 @@ describe('SeatViewEngine (Trigonometry Math & Qualitative Classification)', () =
     expect(view.distance_to_screen).toBe(5.0);
   });
 });
+

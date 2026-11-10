@@ -1,8 +1,21 @@
-// Types định nghĩa cho toàn bộ hệ thống đặt vé
+// Types định nghĩa cho Hệ thống Thương mại Đặt vé Toàn diện (Cụm rạp & Concert Nhà thi đấu)
 
-export type SeatType = 'Standard' | 'VIP' | 'Sweetbox';
+export type EventCategory = 'all' | 'movie' | 'concert' | 'meeting' | 'sport';
+
+export type VenueType = 'cinema_chain' | 'arena' | 'stadium' | 'convention_center';
+
+export type SeatType = 'Standard' | 'VIP' | 'Sweetbox' | 'VVIP_Stage' | 'GA_Fanzone' | 'CAT1' | 'CAT2';
 
 export type SeatStatus = 'available' | 'locked' | 'booked';
+
+export interface Venue {
+  venue_id: number;
+  venue_name: string;
+  venue_type: VenueType;
+  brand_name: string; // "CGV Cinemas", "Lotte Cinema", "BHD Star", "Nhà thi đấu Phú Thọ", "SVĐ Mỹ Đình"
+  city: string; // "TP. Hồ Chí Minh", "Hà Nội", "Đà Nẵng"
+  address: string;
+}
 
 export interface Room {
   room_id: number;
@@ -12,6 +25,8 @@ export interface Room {
   screen_width: number;
   screen_height: number;
   distance_to_row_a: number;
+  venue?: Venue;
+  is_concert_stage?: boolean;
 }
 
 export interface Seat {
@@ -27,11 +42,16 @@ export interface Seat {
   locked_by_user?: string | null;
   lock_expires_in?: number | null; // seconds
   price?: number;
+  zone_name?: string; // "Khu VVIP", "Khán đài A", "Sân Fanzone"
 }
 
-export interface Movie {
-  movie_id: number;
+export interface EntertainmentEvent {
+  event_id: number;
+  movie_id?: number;
   title: string;
+  category: 'movie' | 'concert' | 'meeting' | 'sport';
+  category_label: string; // "Phim Chiếu Rạp", "Live Concert", "Fan Meeting"
+  artists?: string; // "Sơn Tùng M-TP", "Anh Trai Say Hi", dàn diễn viên
   duration_minutes: number;
   poster_url: string;
   backdrop_url?: string;
@@ -39,8 +59,18 @@ export interface Movie {
   genre?: string;
   age_rating?: string;
   description?: string;
-  status: 'NowShowing' | 'ComingSoon' | 'Ended';
+  status: 'NowShowing' | 'SellingFast' | 'ComingSoon' | 'SoldOut';
+  venue_name: string;
+  venue_address: string;
+  city: string;
+  price_from: number;
+  event_dates: string;
 }
+
+// Giữ tương thích ngược với Movie
+export type Movie = EntertainmentEvent & {
+  movie_id?: number;
+};
 
 export interface Showtime {
   showtime_id: number;
@@ -50,7 +80,7 @@ export interface Showtime {
   end_time: string;
   format_type: string;
   is_weekend_or_holiday: boolean;
-  movie?: Movie;
+  movie?: EntertainmentEvent;
   room?: Room;
 }
 
@@ -83,6 +113,7 @@ export interface BookingSeatDetail {
   seat_number: number;
   seat_type: SeatType;
   price_applied: number;
+  zone_name?: string;
 }
 
 export interface Booking {
@@ -105,6 +136,7 @@ export interface Booking {
   movie_title?: string;
   room_name?: string;
   start_time?: string;
+  venue_name?: string;
 }
 
 // Seat View Engine Types

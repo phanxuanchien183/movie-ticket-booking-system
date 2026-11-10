@@ -1,21 +1,10 @@
 import type { Metadata } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 
-const geistSans = Geist({
-  variable: '--font-geist-sans',
-  subsets: ['latin'],
-});
-
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
-  subsets: ['latin'],
-});
-
 export const metadata: Metadata = {
-  title: 'CineTicket Pro - Hệ Thống Đặt Vé Xem Phim & Sự Kiện Fullstack Next.js',
+  title: 'CineTicket Pro - Nền Tảng Đặt Vé Xem Phim & Concert Toàn Diện',
   description:
-    'Hệ thống đặt vé trực tuyến cao cấp với Redis Seat Locking, Seat View Engine 3D mô phỏng góc nhìn rạp, chính sách voucher ràng buộc ngân hàng nghiêm ngặt.',
+    'Hệ thống thương mại đặt vé trực tuyến cao cấp cho cụm rạp chiếu phim CGV, Lotte và live concert, fan meeting tại các nhà thi đấu, sân vận động.',
   icons: {
     icon: '/favicon.ico',
   },
@@ -29,11 +18,11 @@ export default function RootLayout({
   return (
     <html
       lang="vi"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased dark`}
+      className="h-full antialiased dark"
       suppressHydrationWarning
     >
       <body
-        className="min-h-full flex flex-col bg-slate-950 text-slate-100"
+        className="min-h-full flex flex-col bg-slate-950 text-slate-100 font-sans"
         suppressHydrationWarning
       >
         {children}
