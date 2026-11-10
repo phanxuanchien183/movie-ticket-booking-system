@@ -1,8 +1,10 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { EntertainmentEvent, Showtime, Seat, SeatGeometricView } from '@/types';
 import { SeatMap } from './SeatMap';
+import { TicketboxStageMap, TICKETBOX_ZONES, StageZone } from './TicketboxStageMap';
 import {
   ArrowLeft,
   Calendar,
@@ -47,12 +49,17 @@ export const SeatSelectionView: React.FC<SeatSelectionViewProps> = ({
   onBackToDetail,
   onOpenCheckout,
 }) => {
+  const router = useRouter();
   const currentEvent = event || showtime.movie;
   const isConcert = Boolean(
     showtime.room?.is_concert_stage ||
       currentEvent?.category === 'concert' ||
       currentEvent?.category === 'meeting'
   );
+
+  // Concert zone selection state
+  const [selectedZone, setSelectedZone] = useState<StageZone | null>(null);
+  const [ticketQuantity, setTicketQuantity] = useState<number>(0);
 
   const selectedSeatsList = seats.filter((s) => selectedSeatIds.includes(s.seat_id));
   const totalAmount = selectedSeatsList.reduce((sum, s) => sum + (s.price || 90000), 0);
@@ -62,6 +69,151 @@ export const SeatSelectionView: React.FC<SeatSelectionViewProps> = ({
     minute: '2-digit',
   });
 
+  // ==========================================
+  // FLOW 1: TICKETBOX CONCERT STAGE MAP (HÌNH 3 & 4)
+  // ==========================================
+  if (isConcert) {
+    const handleProceedToConcertCheckout = (zone: StageZone, qty: number) => {
+      router.push(`/booking/${showtime.showtime_id}/checkout?zone=${zone.id}&qty=${qty}`);
+    };
+
+    return (
+      <div className="space-y-4 animate-in fade-in duration-200">
+        {/* Top Header matching Hình 3 */}
+        <div className="flex items-center justify-between py-2 border-b border-slate-800">
+          <button
+            type="button"
+            onClick={onBackToDetail}
+            className="flex items-center space-x-2 text-xs sm:text-sm font-bold text-white hover:text-emerald-400 bg-slate-900 hover:bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-800 transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4 text-emerald-400" />
+            <span>Trở về</span>
+          </button>
+
+          <div className="text-center">
+            <div className="text-[#00b14f] font-black text-xs sm:text-sm uppercase tracking-wide">
+              Chọn khu vực
+            </div>
+            <div className="text-slate-400 text-[11px] sm:text-xs">
+              Bấm vào khu vực để chọn vé
+            </div>
+          </div>
+
+          <div className="w-16" />
+        </div>
+
+        {/* Grid: 3 cols Map + 1 col Sidebar matching Hình 3 */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-5 items-start">
+          {/* Main Stage Map (Hình 3 & 4) */}
+          <div className="lg:col-span-3 min-h-[580px] rounded-2xl overflow-hidden shadow-2xl">
+            <TicketboxStageMap
+              selectedZone={selectedZone}
+              ticketQuantity={ticketQuantity}
+              onSelectZone={(zone, qty) => {
+                setSelectedZone(zone);
+                setTicketQuantity(qty);
+              }}
+              onProceedToCheckout={handleProceedToConcertCheckout}
+              onClearSelection={() => {
+                setSelectedZone(null);
+                setTicketQuantity(0);
+              }}
+            />
+          </div>
+
+          {/* Right Sidebar matching Hình 3 */}
+          <div className="bg-[#181c24] rounded-2xl p-5 border border-slate-800/80 space-y-4 shadow-xl text-white">
+            <div className="space-y-1">
+              <h3 className="font-extrabold text-sm sm:text-base leading-snug">
+                {currentEvent?.title || 'Tinh Hà "Say Hi" Concert - Đêm 4'}
+              </h3>
+
+              <div className="flex items-center space-x-2 text-xs text-slate-400 pt-1">
+                <Clock className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                <span>{currentEvent?.event_dates || '19:00 - 23:00, 15 Tháng 11, 2026'}</span>
+              </div>
+
+              <div className="flex items-start space-x-2 text-xs text-slate-400 pt-1">
+                <MapPin className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
+                <span className="leading-snug">
+                  {currentEvent?.venue_name || showtime.room?.venue?.venue_name || 'Trung tâm triển lãm Việt Nam (VEC)'}
+                </span>
+              </div>
+            </div>
+
+            {/* Price list legend */}
+            <div className="pt-3 border-t border-slate-700/60 space-y-2">
+              <span className="text-xs font-bold text-slate-300 block">Giá vé</span>
+              <div className="space-y-1.5 max-h-[350px] overflow-y-auto pr-1 text-xs">
+                {TICKETBOX_ZONES.map((zone) => (
+                  <div
+                    key={zone.id}
+                    onClick={() => {
+                      if (!zone.is_sold_out) {
+                        setSelectedZone(zone);
+                        setTicketQuantity(1);
+                      }
+                    }}
+                    className={`flex items-center justify-between py-1.5 px-2 rounded-lg transition-all ${
+                      zone.is_sold_out
+                        ? 'opacity-50 cursor-not-allowed'
+                        : selectedZone?.id === zone.id
+                        ? 'bg-emerald-500/20 border border-emerald-500/50 cursor-pointer'
+                        : 'hover:bg-slate-800/60 cursor-pointer'
+                    }`}
+                  >
+                    <div className="flex items-center space-x-2.5">
+                      <span
+                        className="w-4 h-2.5 rounded-sm shrink-0"
+                        style={{ backgroundColor: zone.color }}
+                      />
+                      <span className="font-bold text-slate-200">{zone.name}</span>
+                    </div>
+
+                    <div className="flex items-center space-x-2 font-mono">
+                      <span className="text-slate-300 font-bold">
+                        {zone.price.toLocaleString('vi-VN')} đ
+                      </span>
+                      {zone.is_sold_out && (
+                        <span className="text-[10px] text-rose-400 font-bold bg-rose-500/15 px-1.5 py-0.5 rounded">
+                          Hết vé
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Bottom CTA Button */}
+            <div className="pt-3 border-t border-slate-700/60">
+              {selectedZone && ticketQuantity > 0 ? (
+                <button
+                  type="button"
+                  onClick={() => handleProceedToConcertCheckout(selectedZone, ticketQuantity)}
+                  className="w-full py-3.5 rounded-xl bg-[#00b14f] hover:bg-[#009643] text-white font-black text-sm shadow-xl shadow-emerald-600/30 flex items-center justify-center space-x-2 transition-all cursor-pointer"
+                >
+                  <span>Tiếp tục ({(selectedZone.price * ticketQuantity).toLocaleString('vi-VN')} đ) »</span>
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  disabled
+                  className="w-full py-3.5 rounded-xl bg-slate-700/70 text-slate-400 font-extrabold text-sm flex items-center justify-center cursor-not-allowed"
+                >
+                  <span>Vui lòng chọn vé »</span>
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ==========================================
+  // FLOW 2: CINEMA MOVIE SEAT SELECTION
+  // ==========================================
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
       {/* Top Header & Breadcrumb Navigation */}
@@ -78,7 +230,7 @@ export const SeatSelectionView: React.FC<SeatSelectionViewProps> = ({
           <span className="text-slate-600 hidden sm:inline">/</span>
 
           <span className="text-xs text-slate-400 hidden sm:inline font-medium">
-            {isConcert ? 'Chọn vị trí khán đài' : 'Chọn ghế rạp chiếu'}
+            Chọn ghế rạp chiếu
           </span>
         </div>
 
@@ -146,7 +298,7 @@ export const SeatSelectionView: React.FC<SeatSelectionViewProps> = ({
           onToggleSeat={onToggleSeat}
           onOpenSeatView={onOpenSeatView}
           lockTimeRemaining={lockTimeRemaining}
-          isConcert={isConcert}
+          isConcert={false}
         />
       </div>
 
@@ -181,4 +333,3 @@ export const SeatSelectionView: React.FC<SeatSelectionViewProps> = ({
     </div>
   );
 };
-

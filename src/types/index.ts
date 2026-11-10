@@ -77,6 +77,7 @@ export interface EntertainmentEvent {
     capacity?: number;
     perks?: string;
     type?: 'seated' | 'standing';
+    is_sold_out?: boolean;
   }[];
 }
 

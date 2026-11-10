@@ -107,3 +107,4 @@ describe('EventDetailPage Route Component (/events/[id])', () => {
     expect(mockPush).toHaveBeenCalledWith('/booking/1');
   });
 });
+

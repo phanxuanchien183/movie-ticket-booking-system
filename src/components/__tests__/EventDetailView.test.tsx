@@ -89,13 +89,12 @@ describe('EventDetailView Component (Dedicated Event Intro & Ticket Classes Scre
       />
     );
 
-    expect(screen.getByText('Anh Trai Say Hi Live Concert 2026')).toBeDefined();
-    expect(screen.getByText('Bảng Các Loại Vé & Quyền Lợi Khán Đài')).toBeDefined();
-    expect(screen.getByText('SKY LOUNGE')).toBeDefined();
-    expect(screen.getByText('FANZONE TRUNG TÂM')).toBeDefined();
+    expect(screen.getAllByText('Anh Trai Say Hi Live Concert 2026').length).toBeGreaterThan(0);
+    expect(screen.getByText(/Thông tin vé & Các hạng vé mở bán/i)).toBeDefined();
+    expect(screen.getAllByText(/SKY LOUNGE/i).length).toBeGreaterThan(0);
 
-    // Click nút vào sơ đồ khán đài
-    const proceedBtn = screen.getByText('Vào Sơ Đồ Khán Đài Sân Khấu');
+    // Click nút Mua vé ngay vào sơ đồ khán đài
+    const proceedBtn = screen.getAllByText('Mua vé ngay')[0];
     fireEvent.click(proceedBtn);
     expect(handleProceed).toHaveBeenCalled();
   });

@@ -293,81 +293,214 @@ export const EventDetailView: React.FC<EventDetailViewProps> = ({
         </div>
       </div>
 
-      {/* BRANCH 1: CONCERT FLOW -> THÔNG TIN LOẠI VÉ & QUY ĐỊNH */}
+      {/* BRANCH 1: CONCERT FLOW (TICKETBOX STYLE - HÌNH 1 & 2) */}
       {isConcert && (
-        <div className="space-y-6">
-          <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-            <div>
-              <h2 className="text-lg sm:text-xl font-extrabold text-white flex items-center space-x-2">
-                <Ticket className="w-5 h-5 text-rose-500" />
-                <span>Bảng Các Loại Vé &amp; Quyền Lợi Khán Đài</span>
+        <div className="space-y-8">
+          {/* TICKETBOX TOP EVENT CARD (HÌNH 1) */}
+          <div className="p-6 sm:p-8 rounded-3xl bg-slate-900/90 border border-slate-800 flex flex-col md:flex-row items-center justify-between gap-6 shadow-2xl">
+            <div className="space-y-4 max-w-xl text-left">
+              <span className="px-3 py-1 rounded-full text-xs font-black bg-rose-500/15 text-rose-400 border border-rose-500/30 uppercase tracking-wider inline-block">
+                {event.category_label || 'Live Concert'}
+              </span>
+
+              <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight leading-snug">
+                {event.title}
               </h2>
-              <p className="text-xs text-slate-400 mt-0.5">
-                Chọn hạng vé phù hợp để xem vị trí trên sơ đồ sân khấu nhà thi đấu
-              </p>
+
+              <div className="space-y-2 text-xs text-slate-300">
+                <div className="flex items-center space-x-2">
+                  <Calendar className="w-4 h-4 text-rose-400 shrink-0" />
+                  <span className="font-semibold">{event.event_dates}</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <MapPin className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <span className="font-semibold">{event.venue_name}</span>
+                </div>
+                {event.venue_address && (
+                  <p className="text-slate-400 pl-6 text-[11px]">{event.venue_address}</p>
+                )}
+              </div>
+
+              <div className="pt-2 flex items-baseline space-x-3">
+                <span className="text-xs text-slate-400 font-medium">Giá từ:</span>
+                <span className="text-2xl font-black text-[#00b14f] font-mono">
+                  {event.price_from.toLocaleString('vi-VN')} đ
+                </span>
+              </div>
+
+              {/* Big Green Button Mua Vé Ngay (Hình 1) */}
+              <button
+                type="button"
+                onClick={onProceedToSeats}
+                className="w-full sm:w-auto px-10 py-3.5 rounded-xl bg-[#00b14f] hover:bg-[#009643] text-white font-black text-sm shadow-xl shadow-emerald-600/30 flex items-center justify-center space-x-2 transition-all cursor-pointer group"
+              >
+                <span>Mua vé ngay</span>
+                <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </button>
             </div>
-            <span className="text-xs text-emerald-400 font-bold bg-emerald-500/10 px-3 py-1 rounded-xl border border-emerald-500/20">
-              Đang mở bán trực tuyến
-            </span>
+
+            {/* Event Key Visual Visual Banner */}
+            <div className="w-full md:w-80 lg:w-96 rounded-2xl overflow-hidden border border-slate-700 shadow-2xl shrink-0 aspect-[16/9] relative">
+              <img
+                src={event.backdrop_url || event.poster_url}
+                alt={event.title}
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end p-4">
+                <span className="text-xs font-bold text-white tracking-wider">
+                  {event.event_dates} • {event.city}
+                </span>
+              </div>
+            </div>
           </div>
 
-          {/* Ticket Tiers Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {(event.ticket_tiers || [
-              { name: 'SKY LOUNGE', price: 10000000, color: '#38bdf8', type: 'seated', perks: 'Ghế Sofa VIP, Tiệc nhẹ, Quà lưu niệm độc quyền' },
-              { name: 'SVIP SÂN KHẤU', price: 5000000, color: '#06b6d4', type: 'seated', perks: 'Vé Soundcheck, Lối vào ưu tiên' },
-              { name: 'FANZONE TRUNG TÂM', price: 2500000, color: '#6366f1', type: 'standing', perks: 'Sát sàn diễn chính chữ T, không gian cuồng nhiệt' },
-              { name: 'KHÁN ĐÀI CAT 1', price: 1800000, color: '#a855f7', type: 'seated', perks: 'Khán đài trung tâm góc nhìn toàn cảnh' },
-              { name: 'KHÁN ĐÀI CAT 2', price: 1200000, color: '#581c87', type: 'seated' },
-              { name: 'GA TIÊU CHUẨN', price: 800000, color: '#64748b', type: 'standing' },
-            ]).map((tier, idx) => {
-              const isSelected = selectedTicketTier === tier.name;
+          {/* SECTION: GIỚI THIỆU SỰ KIỆN */}
+          <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-4">
+            <h3 className="text-base font-extrabold text-white flex items-center space-x-2 border-b border-slate-800 pb-3">
+              <span className="w-2 h-2 rounded-full bg-emerald-500" />
+              <span>Giới thiệu sự kiện</span>
+            </h3>
 
-              return (
-                <div
-                  key={idx}
-                  onClick={() => setSelectedTicketTier(tier.name)}
-                  className={`p-4 rounded-2xl border cursor-pointer transition-all flex flex-col justify-between space-y-3 ${
-                    isSelected
-                      ? 'bg-slate-900 border-emerald-500 ring-2 ring-emerald-500/40 shadow-xl'
-                      : 'bg-slate-900/60 border-slate-800 hover:border-slate-700 hover:bg-slate-900'
-                  }`}
-                >
-                  <div className="space-y-1.5">
+            <div className="space-y-3 text-xs sm:text-sm text-slate-300 leading-relaxed">
+              <p className="font-semibold text-white">
+                {event.title} - Ngày {event.event_dates} tại {event.venue_name}
+              </p>
+              <p>{event.description}</p>
+            </div>
+          </div>
+
+          {/* SECTION: THÔNG TIN VÉ (HÌNH 2 TICKETBOX STYLE LIST) */}
+          <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-800 pb-4 gap-3">
+              <div>
+                <h3 className="text-base font-black text-white flex items-center space-x-2">
+                  <Ticket className="w-5 h-5 text-rose-500" />
+                  <span>Thông tin vé &amp; Các hạng vé mở bán</span>
+                </h3>
+                <span className="text-xs text-slate-400 mt-0.5 block">
+                  {event.event_dates}
+                </span>
+              </div>
+
+              <button
+                type="button"
+                onClick={onProceedToSeats}
+                className="px-6 py-2.5 rounded-xl bg-[#00b14f] hover:bg-[#009643] text-white font-extrabold text-xs shadow-lg shadow-emerald-600/20 flex items-center space-x-2 transition-all self-start sm:self-auto cursor-pointer"
+              >
+                <span>Mua vé ngay</span>
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* List of 17 Ticket Tiers in Dark Grey Card rows (Hình 2) */}
+            <div className="space-y-2">
+              {(event.ticket_tiers || [
+                { name: 'SKY LOUNGE', price: 10000000, color: '#7dd3fc', type: 'seated', perks: 'Ghế sofa VIP, Tiệc nhẹ, Quà lưu niệm độc quyền' },
+                { name: 'SVIP A', price: 5000000, color: '#38bdf8', type: 'seated', perks: 'Vé Soundcheck, Lối vào ưu tiên', is_sold_out: true },
+                { name: 'SVIP B', price: 5000000, color: '#38bdf8', type: 'seated', perks: 'Vé Soundcheck, Lối vào ưu tiên' },
+                { name: 'VIP A', price: 4000000, color: '#0284c7', type: 'seated', perks: 'Lightstick chính hãng phát sáng' },
+                { name: 'VIP B', price: 4000000, color: '#0284c7', type: 'seated', perks: 'Lightstick chính hãng phát sáng' },
+                { name: 'FANZONE A', price: 2500000, color: '#6366f1', type: 'standing', perks: 'Sát sàn diễn chính chữ T, không gian cuồng nhiệt', is_sold_out: true },
+                { name: 'FANZONE B', price: 2500000, color: '#6366f1', type: 'standing', perks: 'Sát sàn diễn chính chữ T, không gian cuồng nhiệt' },
+                { name: 'CAT 1A', price: 2500000, color: '#8b5cf6', type: 'seated', perks: 'Khán đài trung tâm góc nhìn toàn cảnh' },
+                { name: 'CAT 1B', price: 2500000, color: '#8b5cf6', type: 'seated', perks: 'Khán đài trung tâm góc nhìn toàn cảnh' },
+                { name: 'CAT 2A', price: 1800000, color: '#6b21a8', type: 'seated' },
+                { name: 'CAT 2B', price: 1800000, color: '#6b21a8', type: 'seated' },
+                { name: 'CAT 3A', price: 1500000, color: '#9333ea', type: 'seated', is_sold_out: true },
+                { name: 'CAT 3B', price: 1500000, color: '#9333ea', type: 'seated' },
+                { name: 'GA 1A', price: 1100000, color: '#475569', type: 'standing', is_sold_out: true },
+                { name: 'GA 1B', price: 1100000, color: '#475569', type: 'standing' },
+                { name: 'GA 2A', price: 800000, color: '#334155', type: 'standing' },
+                { name: 'GA 2B', price: 800000, color: '#334155', type: 'standing', is_sold_out: true },
+              ]).map((tier, idx) => {
+                const isSelected = selectedTicketTier === tier.name;
+                const isSoldOut = tier.is_sold_out;
+
+                return (
+                  <div
+                    key={idx}
+                    onClick={() => !isSoldOut && setSelectedTicketTier(isSelected ? null : tier.name)}
+                    className={`p-3.5 sm:p-4 rounded-xl border transition-all cursor-pointer ${
+                      isSelected
+                        ? 'bg-slate-900 border-emerald-500 ring-2 ring-emerald-500/30'
+                        : isSoldOut
+                        ? 'bg-slate-950/40 border-slate-900 opacity-60 cursor-not-allowed'
+                        : 'bg-[#151c28]/70 border-slate-800/80 hover:bg-[#1a2333] hover:border-slate-700'
+                    }`}
+                  >
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
+                      <div className="flex items-center space-x-3">
                         <span
-                          className="w-3.5 h-3.5 rounded-full shrink-0 shadow-sm"
+                          className="w-3 h-3 rounded-sm shrink-0"
                           style={{ backgroundColor: tier.color }}
                         />
-                        <span className="font-extrabold text-sm text-white">{tier.name}</span>
+                        <span className="font-extrabold text-xs sm:text-sm text-white">
+                          {tier.name}
+                        </span>
                       </div>
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-800 text-slate-300">
-                        {tier.type === 'standing' ? 'Vé Đứng (GA)' : 'Ghế Ngồi (Seated)'}
-                      </span>
+
+                      <div className="flex items-center space-x-3">
+                        {isSoldOut ? (
+                          <span className="text-[10px] font-black px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-400 border border-rose-500/30">
+                            Hết vé
+                          </span>
+                        ) : (
+                          <span className="font-black text-xs sm:text-sm text-emerald-400 font-mono">
+                            {tier.price.toLocaleString('vi-VN')} đ
+                          </span>
+                        )}
+                        <ChevronRight
+                          className={`w-4 h-4 text-slate-500 transition-transform ${
+                            isSelected ? 'rotate-90 text-emerald-400' : ''
+                          }`}
+                        />
+                      </div>
                     </div>
 
-                    <div className="text-lg font-black text-emerald-400 font-mono">
-                      {tier.price.toLocaleString('vi-VN')} đ
-                    </div>
-
-                    {tier.perks && (
-                      <p className="text-xs text-slate-400 leading-relaxed bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/80">
-                        🎁 {tier.perks}
-                      </p>
+                    {/* Expandable perks detail (Hình 2 Accordion) */}
+                    {isSelected && (
+                      <div className="mt-3 pt-3 border-t border-slate-800/80 text-xs text-slate-300 space-y-2 animate-in fade-in duration-150">
+                        <p className="text-slate-400 leading-relaxed">
+                          🎁 {tier.perks || 'Vé vào cổng chính thức, 01 vòng tay phát sáng và quà tặng lưu niệm từ Ban Tổ Chức.'}
+                        </p>
+                        <div className="flex items-center justify-between pt-1 text-[11px]">
+                          <span className="text-slate-500">Hình thức: {tier.type === 'standing' ? 'Vé đứng (GA)' : 'Ghế ngồi (Seated)'}</span>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onProceedToSeats();
+                            }}
+                            className="font-bold text-emerald-400 hover:text-emerald-300 flex items-center space-x-1"
+                          >
+                            <span>Vào sơ đồ chọn khu này</span>
+                            <ChevronRight className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
                     )}
                   </div>
+                );
+              })}
+            </div>
+          </div>
 
-                  <div className="pt-2 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
-                    <span>Trạng thái: <strong className="text-emerald-400">Còn vé</strong></span>
-                    <span className="text-emerald-400 font-bold flex items-center space-x-0.5">
-                      <span>Chọn xem sơ đồ</span>
-                      <ChevronRight className="w-3.5 h-3.5" />
-                    </span>
-                  </div>
-                </div>
-              );
-            })}
+          {/* SECTION: ĐƠN VỊ TỔ CHỨC (VIE CHANNEL - HÌNH 2) */}
+          <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-3">
+            <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+              Đơn vị tổ chức
+            </h4>
+            <div className="flex items-center space-x-4">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-rose-600 to-indigo-600 flex items-center justify-center font-black text-white text-xs tracking-tighter shrink-0 shadow-lg">
+                Vie
+              </div>
+              <div className="space-y-0.5">
+                <span className="font-extrabold text-sm text-white block">Vie Channel</span>
+                <span className="text-xs text-slate-400 block">
+                  Nhà sản xuất &amp; Đơn vị tổ chức các đại nhạc hội hàng đầu Việt Nam
+                </span>
+              </div>
+            </div>
           </div>
 
           {/* Event Rules & Regulations Card */}
@@ -392,7 +525,7 @@ export const EventDetailView: React.FC<EventDetailViewProps> = ({
 
             <button
               onClick={onProceedToSeats}
-              className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-rose-500 hover:bg-rose-400 text-white font-extrabold text-sm shadow-xl shadow-rose-500/25 flex items-center justify-center space-x-2 transition-all group"
+              className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-[#00b14f] hover:bg-[#009643] text-white font-extrabold text-sm shadow-xl shadow-emerald-600/25 flex items-center justify-center space-x-2 transition-all group cursor-pointer"
             >
               <span>Vào Sơ Đồ Khán Đài Sân Khấu</span>
               <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
