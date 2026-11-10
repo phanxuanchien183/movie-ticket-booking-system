@@ -90,3 +90,4 @@ describe('SeatSelectionView Component (Dedicated Seat & Stage Map Selection Scre
     expect(handleOpenCheckout).toHaveBeenCalled();
   });
 });
+

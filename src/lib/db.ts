@@ -37,6 +37,7 @@ export function getDbPool(): mysql.Pool | null {
 // ==========================================
 
 export const mockVenues: Venue[] = [
+  // CGV Cinemas Branches
   {
     venue_id: 1,
     venue_name: 'CGV Vincom Landmark 81',
@@ -45,6 +46,65 @@ export const mockVenues: Venue[] = [
     city: 'TP. Hồ Chí Minh',
     address: 'Tầng B1, TTTM Vincom Landmark 81, 720A Điện Biên Phủ, Q. Bình Thạnh',
   },
+  {
+    venue_id: 6,
+    venue_name: 'CGV Hùng Vương Plaza',
+    venue_type: 'cinema_chain',
+    brand_name: 'CGV Cinemas',
+    city: 'TP. Hồ Chí Minh',
+    address: 'Tầng 7, Hùng Vương Plaza, 126 Hồng Bàng, Quận 5',
+  },
+  {
+    venue_id: 7,
+    venue_name: 'CGV Vincom Center Bà Triệu',
+    venue_type: 'cinema_chain',
+    brand_name: 'CGV Cinemas',
+    city: 'Hà Nội',
+    address: 'Tầng 6, Vincom Center, 191 Bà Triệu, Q. Hai Bà Trưng',
+  },
+  // Lotte Cinema Branches
+  {
+    venue_id: 5,
+    venue_name: 'Lotte Cinema Nowzone',
+    venue_type: 'cinema_chain',
+    brand_name: 'Lotte Cinema',
+    city: 'TP. Hồ Chí Minh',
+    address: 'Tầng 5, TTTM Nowzone, 235 Nguyễn Văn Cừ, Quận 1',
+  },
+  {
+    venue_id: 8,
+    venue_name: 'Lotte Cinema Gò Vấp',
+    venue_type: 'cinema_chain',
+    brand_name: 'Lotte Cinema',
+    city: 'TP. Hồ Chí Minh',
+    address: 'Tầng 3, Lotte Mart, 242 Nguyễn Văn Lượng, Q. Gò Vấp',
+  },
+  {
+    venue_id: 9,
+    venue_name: 'Lotte Cinema Keangnam Landmark',
+    venue_type: 'cinema_chain',
+    brand_name: 'Lotte Cinema',
+    city: 'Hà Nội',
+    address: 'Tầng 5, Keangnam Landmark Tower, Phạm Hùng, Q. Nam Từ Liêm',
+  },
+  // BHD Star Cineplex Branches
+  {
+    venue_id: 10,
+    venue_name: 'BHD Star Bitexco',
+    venue_type: 'cinema_chain',
+    brand_name: 'BHD Star',
+    city: 'TP. Hồ Chí Minh',
+    address: 'Tầng 3 & 4, Bitexco Financial Tower, 2 Hải Triều, Quận 1',
+  },
+  {
+    venue_id: 11,
+    venue_name: 'BHD Star Vincom Thảo Điền',
+    venue_type: 'cinema_chain',
+    brand_name: 'BHD Star',
+    city: 'TP. Hồ Chí Minh',
+    address: 'Tầng 5, Vincom Mega Mall Thảo Điền, 159 Xa Lộ Hà Nội, TP. Thủ Đức',
+  },
+  // Arenas & Concert Halls
   {
     venue_id: 2,
     venue_name: 'Nhà Thi Đấu Phú Thọ',
@@ -69,17 +129,10 @@ export const mockVenues: Venue[] = [
     city: 'Hà Nội',
     address: 'Đại lộ Thăng Long, Mễ Trì, Nam Từ Liêm, Hà Nội',
   },
-  {
-    venue_id: 5,
-    venue_name: 'Lotte Cinema Nowzone',
-    venue_type: 'cinema_chain',
-    brand_name: 'Lotte Cinema',
-    city: 'TP. Hồ Chí Minh',
-    address: 'Tầng 5, TTTM Nowzone, 235 Nguyễn Văn Cừ, Quận 1',
-  },
 ];
 
 export const mockRooms: Room[] = [
+  // CGV Vincom Landmark 81
   {
     room_id: 1,
     room_name: 'Phòng Chiếu IMAX Laser 01',
@@ -88,9 +141,94 @@ export const mockRooms: Room[] = [
     screen_width: 14.0,
     screen_height: 7.5,
     distance_to_row_a: 4.5,
-    venue: mockVenues[0],
+    venue: mockVenues.find((v) => v.venue_id === 1),
     is_concert_stage: false,
   },
+  // CGV Hùng Vương Plaza
+  {
+    room_id: 5,
+    room_name: 'Phòng Chiếu Cinema 03',
+    total_rows: 8,
+    seats_per_row: 12,
+    screen_width: 13.0,
+    screen_height: 6.8,
+    distance_to_row_a: 4.2,
+    venue: mockVenues.find((v) => v.venue_id === 6),
+    is_concert_stage: false,
+  },
+  // CGV Vincom Bà Triệu
+  {
+    room_id: 6,
+    room_name: 'Phòng Chiếu Gold Class VIP 01',
+    total_rows: 8,
+    seats_per_row: 12,
+    screen_width: 12.5,
+    screen_height: 6.5,
+    distance_to_row_a: 4.0,
+    venue: mockVenues.find((v) => v.venue_id === 7),
+    is_concert_stage: false,
+  },
+  // Lotte Cinema Nowzone
+  {
+    room_id: 7,
+    room_name: 'Phòng Chiếu SuperFlex 01',
+    total_rows: 8,
+    seats_per_row: 12,
+    screen_width: 13.5,
+    screen_height: 7.0,
+    distance_to_row_a: 4.3,
+    venue: mockVenues.find((v) => v.venue_id === 5),
+    is_concert_stage: false,
+  },
+  // Lotte Cinema Gò Vấp
+  {
+    room_id: 8,
+    room_name: 'Phòng Chiếu Cinema 02',
+    total_rows: 8,
+    seats_per_row: 12,
+    screen_width: 13.0,
+    screen_height: 6.8,
+    distance_to_row_a: 4.2,
+    venue: mockVenues.find((v) => v.venue_id === 8),
+    is_concert_stage: false,
+  },
+  // Lotte Cinema Keangnam
+  {
+    room_id: 9,
+    room_name: 'Phòng Chiếu Prestige 01',
+    total_rows: 8,
+    seats_per_row: 12,
+    screen_width: 13.0,
+    screen_height: 6.8,
+    distance_to_row_a: 4.2,
+    venue: mockVenues.find((v) => v.venue_id === 9),
+    is_concert_stage: false,
+  },
+  // BHD Star Bitexco
+  {
+    room_id: 10,
+    room_name: 'Phòng Chiếu First Class Atmos 01',
+    total_rows: 8,
+    seats_per_row: 12,
+    screen_width: 13.0,
+    screen_height: 6.8,
+    distance_to_row_a: 4.2,
+    venue: mockVenues.find((v) => v.venue_id === 10),
+    is_concert_stage: false,
+  },
+  // BHD Star Vincom Thảo Điền
+  {
+    room_id: 11,
+    room_name: 'Phòng Chiếu Cinema 03',
+    total_rows: 8,
+    seats_per_row: 12,
+    screen_width: 12.8,
+    screen_height: 6.6,
+    distance_to_row_a: 4.1,
+    venue: mockVenues.find((v) => v.venue_id === 11),
+    is_concert_stage: false,
+  },
+  // Nhà Thi Đấu Phú Thọ
   {
     room_id: 2,
     room_name: 'Sân Khấu Chính - Nhà Thi Đấu Phú Thọ',
@@ -99,9 +237,10 @@ export const mockRooms: Room[] = [
     screen_width: 16.0,
     screen_height: 8.0,
     distance_to_row_a: 5.0,
-    venue: mockVenues[1],
+    venue: mockVenues.find((v) => v.venue_id === 2),
     is_concert_stage: true,
   },
+  // Nhà Thi Đấu Quân Khu 7
   {
     room_id: 3,
     room_name: 'Khán Đài Trung Tâm - QK7 Arena',
@@ -110,9 +249,10 @@ export const mockRooms: Room[] = [
     screen_width: 15.0,
     screen_height: 7.5,
     distance_to_row_a: 4.8,
-    venue: mockVenues[2],
+    venue: mockVenues.find((v) => v.venue_id === 3),
     is_concert_stage: true,
   },
+  // Trung Tâm Hội Nghị Quốc Gia
   {
     room_id: 4,
     room_name: 'Đại Sảnh Hội Nghị Hòa Bình - NCC',
@@ -121,7 +261,7 @@ export const mockRooms: Room[] = [
     screen_width: 14.0,
     screen_height: 6.5,
     distance_to_row_a: 4.5,
-    venue: mockVenues[3],
+    venue: mockVenues.find((v) => v.venue_id === 4),
     is_concert_stage: true,
   },
 ];
@@ -203,6 +343,13 @@ const mockSeats: Map<number, Seat[]> = new Map([
   [2, generateSeatsForRoom(2, true)],
   [3, generateSeatsForRoom(3, true)],
   [4, generateSeatsForRoom(4, true)],
+  [5, generateSeatsForRoom(5, false)],
+  [6, generateSeatsForRoom(6, false)],
+  [7, generateSeatsForRoom(7, false)],
+  [8, generateSeatsForRoom(8, false)],
+  [9, generateSeatsForRoom(9, false)],
+  [10, generateSeatsForRoom(10, false)],
+  [11, generateSeatsForRoom(11, false)],
 ]);
 
 // Danh sách sự kiện phong phú (Phim rạp + Concert nhà thi đấu + Fan Meeting)
@@ -403,7 +550,10 @@ export const mockEvents: (EntertainmentEvent & { movie_id: number })[] = [
 ];
 
 export const mockShowtimes: Showtime[] = [
-  // Suất chiếu Dune (CGV IMAX)
+  // ==========================================
+  // 1. DUNE: HÀNH TINH CÁT 2 (movie_id: 1)
+  // ==========================================
+  // Chi nhánh CGV Vincom Landmark 81 (room 1)
   {
     showtime_id: 1,
     movie_id: 1,
@@ -413,7 +563,7 @@ export const mockShowtimes: Showtime[] = [
     format_type: 'CGV IMAX Laser 2D',
     is_weekend_or_holiday: false,
     movie: mockEvents.find((e) => e.movie_id === 1),
-    room: mockRooms[0],
+    room: mockRooms.find((r) => r.room_id === 1),
   },
   {
     showtime_id: 2,
@@ -424,34 +574,213 @@ export const mockShowtimes: Showtime[] = [
     format_type: 'CGV IMAX Laser 2D',
     is_weekend_or_holiday: false,
     movie: mockEvents.find((e) => e.movie_id === 1),
-    room: mockRooms[0],
+    room: mockRooms.find((r) => r.room_id === 1),
   },
-  // Suất chiếu Oppenheimer
+  // Chi nhánh CGV Hùng Vương Plaza (room 5)
+  {
+    showtime_id: 11,
+    movie_id: 1,
+    room_id: 5,
+    start_time: '2026-11-11T18:15:00',
+    end_time: '2026-11-11T21:00:00',
+    format_type: '2D Phụ đề',
+    is_weekend_or_holiday: false,
+    movie: mockEvents.find((e) => e.movie_id === 1),
+    room: mockRooms.find((r) => r.room_id === 5),
+  },
+  {
+    showtime_id: 12,
+    movie_id: 1,
+    room_id: 5,
+    start_time: '2026-11-11T20:45:00',
+    end_time: '2026-11-11T23:30:00',
+    format_type: '2D Lồng tiếng',
+    is_weekend_or_holiday: false,
+    movie: mockEvents.find((e) => e.movie_id === 1),
+    room: mockRooms.find((r) => r.room_id === 5),
+  },
+  // Chi nhánh CGV Vincom Bà Triệu (room 6)
+  {
+    showtime_id: 13,
+    movie_id: 1,
+    room_id: 6,
+    start_time: '2026-11-11T19:00:00',
+    end_time: '2026-11-11T21:45:00',
+    format_type: 'CGV Gold Class VIP',
+    is_weekend_or_holiday: false,
+    movie: mockEvents.find((e) => e.movie_id === 1),
+    room: mockRooms.find((r) => r.room_id === 6),
+  },
+  // Chi nhánh Lotte Cinema Nowzone (room 7)
+  {
+    showtime_id: 14,
+    movie_id: 1,
+    room_id: 7,
+    start_time: '2026-11-11T18:30:00',
+    end_time: '2026-11-11T21:15:00',
+    format_type: 'Lotte SuperFlex 2D',
+    is_weekend_or_holiday: false,
+    movie: mockEvents.find((e) => e.movie_id === 1),
+    room: mockRooms.find((r) => r.room_id === 7),
+  },
+  {
+    showtime_id: 15,
+    movie_id: 1,
+    room_id: 7,
+    start_time: '2026-11-11T21:30:00',
+    end_time: '2026-11-12T00:15:00',
+    format_type: 'Lotte 2D Cinema',
+    is_weekend_or_holiday: false,
+    movie: mockEvents.find((e) => e.movie_id === 1),
+    room: mockRooms.find((r) => r.room_id === 7),
+  },
+  // Chi nhánh Lotte Cinema Gò Vấp (room 8)
+  {
+    showtime_id: 16,
+    movie_id: 1,
+    room_id: 8,
+    start_time: '2026-11-11T17:45:00',
+    end_time: '2026-11-11T20:30:00',
+    format_type: 'Lotte 2D Cinema',
+    is_weekend_or_holiday: false,
+    movie: mockEvents.find((e) => e.movie_id === 1),
+    room: mockRooms.find((r) => r.room_id === 8),
+  },
+  // Chi nhánh BHD Star Bitexco (room 10)
+  {
+    showtime_id: 17,
+    movie_id: 1,
+    room_id: 10,
+    start_time: '2026-11-11T18:45:00',
+    end_time: '2026-11-11T21:30:00',
+    format_type: 'BHD Dolby Atmos 2D',
+    is_weekend_or_holiday: false,
+    movie: mockEvents.find((e) => e.movie_id === 1),
+    room: mockRooms.find((r) => r.room_id === 10),
+  },
+  {
+    showtime_id: 18,
+    movie_id: 1,
+    room_id: 10,
+    start_time: '2026-11-11T21:15:00',
+    end_time: '2026-11-12T00:00:00',
+    format_type: 'BHD 2D Phụ đề',
+    is_weekend_or_holiday: false,
+    movie: mockEvents.find((e) => e.movie_id === 1),
+    room: mockRooms.find((r) => r.room_id === 10),
+  },
+  // Chi nhánh BHD Star Thảo Điền (room 11)
+  {
+    showtime_id: 19,
+    movie_id: 1,
+    room_id: 11,
+    start_time: '2026-11-11T19:15:00',
+    end_time: '2026-11-11T22:00:00',
+    format_type: 'BHD 2D Digital',
+    is_weekend_or_holiday: false,
+    movie: mockEvents.find((e) => e.movie_id === 1),
+    room: mockRooms.find((r) => r.room_id === 11),
+  },
+
+  // ==========================================
+  // 2. OPPENHEIMER (movie_id: 2)
+  // ==========================================
   {
     showtime_id: 3,
     movie_id: 2,
     room_id: 1,
     start_time: '2026-11-12T18:00:00',
     end_time: '2026-11-12T21:00:00',
+    format_type: 'CGV IMAX Laser 2D',
+    is_weekend_or_holiday: false,
+    movie: mockEvents.find((e) => e.movie_id === 2),
+    room: mockRooms.find((r) => r.room_id === 1),
+  },
+  {
+    showtime_id: 20,
+    movie_id: 2,
+    room_id: 5,
+    start_time: '2026-11-12T19:30:00',
+    end_time: '2026-11-12T22:30:00',
     format_type: '2D Phụ đề',
     is_weekend_or_holiday: false,
     movie: mockEvents.find((e) => e.movie_id === 2),
-    room: mockRooms[0],
+    room: mockRooms.find((r) => r.room_id === 5),
   },
-  // Suất chiếu Mai (Lotte Cinema)
+  {
+    showtime_id: 21,
+    movie_id: 2,
+    room_id: 7,
+    start_time: '2026-11-12T20:15:00',
+    end_time: '2026-11-12T23:15:00',
+    format_type: 'Lotte SuperFlex 2D',
+    is_weekend_or_holiday: false,
+    movie: mockEvents.find((e) => e.movie_id === 2),
+    room: mockRooms.find((r) => r.room_id === 7),
+  },
+  {
+    showtime_id: 22,
+    movie_id: 2,
+    room_id: 10,
+    start_time: '2026-11-12T19:00:00',
+    end_time: '2026-11-12T22:00:00',
+    format_type: 'BHD Dolby Atmos 2D',
+    is_weekend_or_holiday: false,
+    movie: mockEvents.find((e) => e.movie_id === 2),
+    room: mockRooms.find((r) => r.room_id === 10),
+  },
+
+  // ==========================================
+  // 3. MAI (movie_id: 3)
+  // ==========================================
   {
     showtime_id: 4,
     movie_id: 3,
-    room_id: 1,
+    room_id: 7,
     start_time: '2026-11-14T20:00:00',
     end_time: '2026-11-14T22:15:00',
     format_type: 'Lotte 2D Cinema',
     is_weekend_or_holiday: true,
     movie: mockEvents.find((e) => e.movie_id === 3),
-    room: mockRooms[0],
+    room: mockRooms.find((r) => r.room_id === 7),
+  },
+  {
+    showtime_id: 23,
+    movie_id: 3,
+    room_id: 1,
+    start_time: '2026-11-14T18:30:00',
+    end_time: '2026-11-14T20:45:00',
+    format_type: 'CGV 2D Digital',
+    is_weekend_or_holiday: true,
+    movie: mockEvents.find((e) => e.movie_id === 3),
+    room: mockRooms.find((r) => r.room_id === 1),
+  },
+  {
+    showtime_id: 24,
+    movie_id: 3,
+    room_id: 5,
+    start_time: '2026-11-14T21:00:00',
+    end_time: '2026-11-14T23:15:00',
+    format_type: '2D Tiêu chuẩn',
+    is_weekend_or_holiday: true,
+    movie: mockEvents.find((e) => e.movie_id === 3),
+    room: mockRooms.find((r) => r.room_id === 5),
+  },
+  {
+    showtime_id: 25,
+    movie_id: 3,
+    room_id: 11,
+    start_time: '2026-11-14T19:45:00',
+    end_time: '2026-11-14T22:00:00',
+    format_type: 'BHD 2D Digital',
+    is_weekend_or_holiday: true,
+    movie: mockEvents.find((e) => e.movie_id === 3),
+    room: mockRooms.find((r) => r.room_id === 11),
   },
 
-  // Suất diễn Anh Trai Say Hi Live Concert (Nhà thi đấu QK7)
+  // ==========================================
+  // CONCERTS & FAN MEETINGS
+  // ==========================================
   {
     showtime_id: 101,
     movie_id: 101,
@@ -461,10 +790,8 @@ export const mockShowtimes: Showtime[] = [
     format_type: 'Live Arena Show 360°',
     is_weekend_or_holiday: true,
     movie: mockEvents.find((e) => e.movie_id === 101),
-    room: mockRooms[2],
+    room: mockRooms.find((r) => r.room_id === 3),
   },
-
-  // Suất diễn Sơn Tùng M-TP Sky Tour (Nhà thi đấu Phú Thọ)
   {
     showtime_id: 102,
     movie_id: 102,
@@ -474,10 +801,8 @@ export const mockShowtimes: Showtime[] = [
     format_type: 'Super Stage VIP',
     is_weekend_or_holiday: true,
     movie: mockEvents.find((e) => e.movie_id === 102),
-    room: mockRooms[1],
+    room: mockRooms.find((r) => r.room_id === 2),
   },
-
-  // Suất diễn Vũ. Live Concert (Trung tâm Hội nghị Quốc gia)
   {
     showtime_id: 103,
     movie_id: 103,
@@ -487,10 +812,8 @@ export const mockShowtimes: Showtime[] = [
     format_type: 'Grand Hall Concert',
     is_weekend_or_holiday: true,
     movie: mockEvents.find((e) => e.movie_id === 103),
-    room: mockRooms[3],
+    room: mockRooms.find((r) => r.room_id === 4),
   },
-
-  // Fan Meeting K-Pop (Nhà thi đấu Phú Thọ)
   {
     showtime_id: 104,
     movie_id: 104,
@@ -500,7 +823,7 @@ export const mockShowtimes: Showtime[] = [
     format_type: 'Fan Meet & Greet',
     is_weekend_or_holiday: true,
     movie: mockEvents.find((e) => e.movie_id === 104),
-    room: mockRooms[1],
+    room: mockRooms.find((r) => r.room_id === 2),
   },
 ];
 
@@ -582,11 +905,15 @@ export const db = {
     return mockEvents;
   },
 
-  async getShowtimes(movieId?: number): Promise<Showtime[]> {
+  async getShowtimes(movieId?: number, venueId?: number): Promise<Showtime[]> {
+    let list = mockShowtimes;
     if (movieId) {
-      return mockShowtimes.filter((s) => s.movie_id === movieId);
+      list = list.filter((s) => s.movie_id === movieId);
     }
-    return mockShowtimes;
+    if (venueId) {
+      list = list.filter((s) => s.room?.venue?.venue_id === venueId);
+    }
+    return list;
   },
 
   async getShowtimeById(showtimeId: number): Promise<Showtime | null> {
@@ -596,7 +923,11 @@ export const db = {
   async getSeatsByRoom(roomId: number): Promise<Seat[]> {
     const list = mockSeats.get(roomId);
     if (list) return list;
-    return generateSeatsForRoom(roomId, roomId > 1);
+    const room = mockRooms.find((r) => r.room_id === roomId);
+    const isConcert = room ? !!room.is_concert_stage : false;
+    const generated = generateSeatsForRoom(roomId, isConcert);
+    mockSeats.set(roomId, generated);
+    return generated;
   },
 
   async getBookedSeatIds(showtimeId: number): Promise<string[]> {

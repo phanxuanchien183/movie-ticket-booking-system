@@ -126,4 +126,192 @@ describe('EventDetailView Component (Dedicated Event Intro & Ticket Classes Scre
     fireEvent.click(proceedBtn);
     expect(handleProceed).toHaveBeenCalled();
   });
+
+  it('Hiển thị danh sách các chi nhánh rạp và cho phép chọn chi nhánh trước khi chọn giờ chiếu', () => {
+    const handleProceed = vi.fn();
+    const handleSelectShowtime = vi.fn();
+
+    const multiBranchShowtimes: Showtime[] = [
+      {
+        showtime_id: 1,
+        movie_id: 1,
+        room_id: 1,
+        start_time: '2026-11-11T19:30:00',
+        end_time: '2026-11-11T22:15:00',
+        format_type: 'CGV IMAX Laser 2D',
+        is_weekend_or_holiday: false,
+        room: {
+          room_id: 1,
+          room_name: 'Phòng Chiếu IMAX 01',
+          total_rows: 8,
+          seats_per_row: 12,
+          screen_width: 14,
+          screen_height: 7.5,
+          distance_to_row_a: 4.5,
+          venue: {
+            venue_id: 1,
+            venue_name: 'CGV Vincom Landmark 81',
+            brand_name: 'CGV Cinemas',
+            venue_type: 'cinema_chain',
+            city: 'TP. Hồ Chí Minh',
+            address: 'Tầng B1, TTTM Vincom Landmark 81',
+          },
+        },
+      },
+      {
+        showtime_id: 11,
+        movie_id: 1,
+        room_id: 5,
+        start_time: '2026-11-11T18:15:00',
+        end_time: '2026-11-11T21:00:00',
+        format_type: '2D Phụ đề',
+        is_weekend_or_holiday: false,
+        room: {
+          room_id: 5,
+          room_name: 'Phòng Chiếu Cinema 03',
+          total_rows: 8,
+          seats_per_row: 12,
+          screen_width: 13,
+          screen_height: 6.8,
+          distance_to_row_a: 4.2,
+          venue: {
+            venue_id: 6,
+            venue_name: 'CGV Hùng Vương Plaza',
+            brand_name: 'CGV Cinemas',
+            venue_type: 'cinema_chain',
+            city: 'TP. Hồ Chí Minh',
+            address: 'Tầng 7, Hùng Vương Plaza, Quận 5',
+          },
+        },
+      },
+      {
+        showtime_id: 14,
+        movie_id: 1,
+        room_id: 7,
+        start_time: '2026-11-11T20:00:00',
+        end_time: '2026-11-11T22:30:00',
+        format_type: 'Lotte SuperFlex 2D',
+        is_weekend_or_holiday: false,
+        room: {
+          room_id: 7,
+          room_name: 'Phòng Chiếu SuperFlex 01',
+          total_rows: 8,
+          seats_per_row: 12,
+          screen_width: 13.5,
+          screen_height: 7,
+          distance_to_row_a: 4.3,
+          venue: {
+            venue_id: 5,
+            venue_name: 'Lotte Cinema Nowzone',
+            brand_name: 'Lotte Cinema',
+            venue_type: 'cinema_chain',
+            city: 'TP. Hồ Chí Minh',
+            address: 'Tầng 5, TTTM Nowzone, Quận 1',
+          },
+        },
+      },
+    ];
+
+    render(
+      <EventDetailView
+        event={mockMovie}
+        showtimes={multiBranchShowtimes}
+        selectedShowtime={multiBranchShowtimes[0]}
+        onSelectShowtime={handleSelectShowtime}
+        onProceedToSeats={handleProceed}
+        onBackToHome={vi.fn()}
+      />
+    );
+
+    // Xác nhận phần chọn chi nhánh trước chỗ chọn giờ có mặt
+    expect(screen.getByText(/2\. Chọn Chi Nhánh Rạp Gần Bạn/i)).toBeDefined();
+    expect(screen.getAllByText('CGV Vincom Landmark 81').length).toBeGreaterThan(0);
+    expect(screen.getByText('CGV Hùng Vương Plaza')).toBeDefined();
+    expect(screen.getByText('Lotte Cinema Nowzone')).toBeDefined();
+
+    // Click chuyển sang chi nhánh CGV Hùng Vương Plaza
+    const hungVuongBranchCard = screen.getByText('CGV Hùng Vương Plaza');
+    fireEvent.click(hungVuongBranchCard);
+
+    // Đã gọi đổi suất chiếu sang suất thuộc CGV Hùng Vương Plaza
+    expect(handleSelectShowtime).toHaveBeenCalledWith(multiBranchShowtimes[1]);
+  });
+
+  it('Lọc các chi nhánh rạp theo thương hiệu rạp (CGV, Lotte)', () => {
+    const multiBranchShowtimes: Showtime[] = [
+      {
+        showtime_id: 1,
+        movie_id: 1,
+        room_id: 1,
+        start_time: '2026-11-11T19:30:00',
+        end_time: '2026-11-11T22:15:00',
+        format_type: 'CGV IMAX Laser 2D',
+        is_weekend_or_holiday: false,
+        room: {
+          room_id: 1,
+          room_name: 'Phòng Chiếu IMAX 01',
+          total_rows: 8,
+          seats_per_row: 12,
+          screen_width: 14,
+          screen_height: 7.5,
+          distance_to_row_a: 4.5,
+          venue: {
+            venue_id: 1,
+            venue_name: 'CGV Vincom Landmark 81',
+            brand_name: 'CGV Cinemas',
+            venue_type: 'cinema_chain',
+            city: 'TP. Hồ Chí Minh',
+            address: 'Tầng B1, TTTM Vincom Landmark 81',
+          },
+        },
+      },
+      {
+        showtime_id: 14,
+        movie_id: 1,
+        room_id: 7,
+        start_time: '2026-11-11T20:00:00',
+        end_time: '2026-11-11T22:30:00',
+        format_type: 'Lotte SuperFlex 2D',
+        is_weekend_or_holiday: false,
+        room: {
+          room_id: 7,
+          room_name: 'Phòng Chiếu SuperFlex 01',
+          total_rows: 8,
+          seats_per_row: 12,
+          screen_width: 13.5,
+          screen_height: 7,
+          distance_to_row_a: 4.3,
+          venue: {
+            venue_id: 5,
+            venue_name: 'Lotte Cinema Nowzone',
+            brand_name: 'Lotte Cinema',
+            venue_type: 'cinema_chain',
+            city: 'TP. Hồ Chí Minh',
+            address: 'Tầng 5, TTTM Nowzone, Quận 1',
+          },
+        },
+      },
+    ];
+
+    render(
+      <EventDetailView
+        event={mockMovie}
+        showtimes={multiBranchShowtimes}
+        selectedShowtime={multiBranchShowtimes[0]}
+        onSelectShowtime={vi.fn()}
+        onProceedToSeats={vi.fn()}
+        onBackToHome={vi.fn()}
+      />
+    );
+
+    // Bấm chọn tab thương hiệu Lotte Cinema
+    const lotteBrandBtn = screen.getByRole('button', { name: /Lotte Cinema/i });
+    fireEvent.click(lotteBrandBtn);
+
+    // Xác nhận chi nhánh Lotte Cinema Nowzone vẫn hiển thị
+    expect(screen.getByText('Lotte Cinema Nowzone')).toBeDefined();
+    // CGV Landmark 81 trong danh sách chi nhánh (h4) bị lọc ẩn đi
+    expect(screen.queryByRole('heading', { name: 'CGV Vincom Landmark 81' })).toBeNull();
+  });
 });
+

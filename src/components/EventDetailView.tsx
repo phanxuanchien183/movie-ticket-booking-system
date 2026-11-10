@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
-import { EntertainmentEvent, Showtime } from '@/types';
+import React, { useState, useMemo, useEffect } from 'react';
+import { EntertainmentEvent, Showtime, Venue } from '@/types';
 import {
   ArrowLeft,
   Calendar,
@@ -20,6 +20,8 @@ import {
   Info,
   AlertCircle,
   ExternalLink,
+  Building2,
+  Compass,
 } from 'lucide-react';
 
 interface EventDetailViewProps {
@@ -43,15 +45,133 @@ export const EventDetailView: React.FC<EventDetailViewProps> = ({
   const [isPlayingTrailer, setIsPlayingTrailer] = useState(false);
   const [selectedTicketTier, setSelectedTicketTier] = useState<string | null>(null);
 
-  // Nhóm suất chiếu theo định dạng rạp (IMAX, 2D, 3D...)
-  const formatGroups = new Map<string, Showtime[]>();
-  showtimes.forEach((st) => {
-    const format = st.format_type;
-    if (!formatGroups.has(format)) {
-      formatGroups.set(format, []);
+  // 1. Trích xuất danh sách các chi nhánh cụm rạp từ danh sách suất chiếu
+  const branches = useMemo(() => {
+    const map = new Map<number, Venue>();
+    showtimes.forEach((st) => {
+      const v: Venue = st.room?.venue || {
+        venue_id: st.room_id || 1,
+        venue_name: event.venue_name || 'Rạp Chiếu Phim Đối Tác',
+        brand_name: 'CGV Cinemas',
+        venue_type: 'cinema_chain',
+        city: event.city || 'TP. Hồ Chí Minh',
+        address: event.venue_address || 'Địa chỉ đang cập nhật',
+      };
+      if (!map.has(v.venue_id)) {
+        map.set(v.venue_id, v);
+      }
+    });
+
+    // Nếu showtimes rỗng nhưng là phim, thêm rạp mặc định
+    if (map.size === 0 && !isConcert) {
+      map.set(1, {
+        venue_id: 1,
+        venue_name: event.venue_name || 'CGV Vincom Landmark 81',
+        brand_name: 'CGV Cinemas',
+        venue_type: 'cinema_chain',
+        city: event.city || 'TP. Hồ Chí Minh',
+        address: event.venue_address || 'Tầng B1, TTTM Landmark 81, TP.HCM',
+      });
     }
-    formatGroups.get(format)!.push(st);
+
+    return Array.from(map.values());
+  }, [showtimes, event, isConcert]);
+
+  // 2. Danh sách các thương hiệu rạp (CGV, Lotte, BHD...)
+  const brands = useMemo(() => {
+    const list: string[] = [];
+    branches.forEach((b) => {
+      if (b.brand_name && !list.includes(b.brand_name)) {
+        list.push(b.brand_name);
+      }
+    });
+    return list;
+  }, [branches]);
+
+  // 3. Danh sách các tỉnh/thành phố
+  const cities = useMemo(() => {
+    const list: string[] = [];
+    branches.forEach((b) => {
+      if (b.city && !list.includes(b.city)) {
+        list.push(b.city);
+      }
+    });
+    return list;
+  }, [branches]);
+
+  // Quản lý trạng thái bộ lọc: Thương hiệu rạp, Thành phố, và Chi nhánh được chọn
+  const [selectedBrand, setSelectedBrand] = useState<string>('all');
+  const [selectedCity, setSelectedCity] = useState<string>('all');
+  const [selectedVenueId, setSelectedVenueId] = useState<number | null>(() => {
+    return selectedShowtime?.room?.venue?.venue_id || branches[0]?.venue_id || null;
   });
+
+  // Tự động đồng bộ khi `selectedShowtime` thay đổi từ bên ngoài
+  useEffect(() => {
+    if (selectedShowtime?.room?.venue?.venue_id) {
+      setSelectedVenueId(selectedShowtime.room.venue.venue_id);
+    }
+  }, [selectedShowtime]);
+
+  // Lọc danh sách chi nhánh theo Thương hiệu và Thành phố
+  const filteredBranches = useMemo(() => {
+    return branches.filter((b) => {
+      const matchBrand = selectedBrand === 'all' || b.brand_name === selectedBrand;
+      const matchCity = selectedCity === 'all' || b.city === selectedCity;
+      return matchBrand && matchCity;
+    });
+  }, [branches, selectedBrand, selectedCity]);
+
+  // Chi nhánh đang được chọn (ưu tiên theo selectedVenueId, nếu không có lấy chi nhánh đầu tiên của danh sách đã lọc)
+  const activeBranch = useMemo(() => {
+    return (
+      branches.find((b) => b.venue_id === selectedVenueId) ||
+      filteredBranches[0] ||
+      branches[0] ||
+      null
+    );
+  }, [branches, selectedVenueId, filteredBranches]);
+
+  // Khi người dùng chọn 1 chi nhánh cụ thể
+  const handleSelectBranch = (branch: Venue) => {
+    setSelectedVenueId(branch.venue_id);
+
+    // Lọc các suất chiếu thuộc chi nhánh vừa chọn
+    const branchSts = showtimes.filter((st) => {
+      const vId = st.room?.venue?.venue_id || st.room_id;
+      return vId === branch.venue_id;
+    });
+
+    // Nếu suất chiếu hiện tại không thuộc chi nhánh này, tự động chọn suất đầu tiên của chi nhánh
+    const isCurrentInBranch = branchSts.some(
+      (st) => st.showtime_id === selectedShowtime?.showtime_id
+    );
+    if (!isCurrentInBranch && branchSts.length > 0) {
+      onSelectShowtime(branchSts[0]);
+    }
+  };
+
+  // Suất chiếu thuộc chi nhánh đang chọn
+  const activeBranchShowtimes = useMemo(() => {
+    if (!activeBranch) return showtimes;
+    return showtimes.filter((st) => {
+      const vId = st.room?.venue?.venue_id || st.room_id;
+      return vId === activeBranch.venue_id;
+    });
+  }, [showtimes, activeBranch]);
+
+  // Nhóm suất chiếu của chi nhánh theo định dạng phòng (IMAX, 2D, 3D...)
+  const formatGroups = useMemo(() => {
+    const groups = new Map<string, Showtime[]>();
+    activeBranchShowtimes.forEach((st) => {
+      const format = st.format_type;
+      if (!groups.has(format)) {
+        groups.set(format, []);
+      }
+      groups.get(format)!.push(st);
+    });
+    return groups;
+  }, [activeBranchShowtimes]);
 
   const formatList = Array.from(formatGroups.keys());
 
@@ -323,15 +443,15 @@ export const EventDetailView: React.FC<EventDetailViewProps> = ({
           )}
 
           {/* CHỌN CỤM RẠP & KHUNG GIỜ SUẤT CHIẾU */}
-          <div className="space-y-4 pt-2">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div className="space-y-6 pt-2">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-800 pb-3 gap-2">
               <div>
                 <h2 className="text-lg sm:text-xl font-extrabold text-white flex items-center space-x-2">
                   <Film className="w-5 h-5 text-emerald-400" />
-                  <span>Chọn Cụm Rạp &amp; Khung Giờ Suất Chiếu</span>
+                  <span>Chọn Cụm Rạp, Chi Nhánh &amp; Khung Giờ Chiếu</span>
                 </h2>
                 <p className="text-xs text-slate-400 mt-0.5">
-                  Lựa chọn định dạng chiếu và giờ chiếu tại cụm rạp đối tác
+                  Lựa chọn thương hiệu rạp, chi nhánh cụm rạp gần bạn và khung giờ xem phim phù hợp
                 </p>
               </div>
 
@@ -340,60 +460,258 @@ export const EventDetailView: React.FC<EventDetailViewProps> = ({
               </span>
             </div>
 
-            {/* Formats and Hours */}
-            <div className="space-y-4">
-              {formatList.map((format) => {
-                const groupShowtimes = formatGroups.get(format) || [];
+            {/* BƯỚC 1: CHỌN THƯƠNG HIỆU RẠP (CGV, Lotte, BHD...) */}
+            <div className="space-y-2.5">
+              <label className="text-xs font-bold text-slate-300 flex items-center space-x-1.5">
+                <Building2 className="w-3.5 h-3.5 text-emerald-400" />
+                <span>1. Chọn Thương Hiệu Cụm Rạp:</span>
+              </label>
 
-                return (
-                  <div key={format} className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-3">
-                    <div className="flex items-center space-x-2">
-                      <span className="px-2.5 py-0.5 rounded text-xs font-black bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                        {format}
-                      </span>
-                      <span className="text-xs text-slate-400 font-medium">
-                        • {groupShowtimes[0]?.room?.room_name || 'Phòng chiếu rạp'}
-                      </span>
-                    </div>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => setSelectedBrand('all')}
+                  className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 ${
+                    selectedBrand === 'all'
+                      ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/20 font-black'
+                      : 'bg-slate-900 text-slate-300 hover:text-white hover:bg-slate-800 border border-slate-800'
+                  }`}
+                >
+                  <span>Tất Cả Cụm Rạp</span>
+                  <span className="text-[10px] opacity-80">({branches.length})</span>
+                </button>
 
-                    {/* Showtimes Pill List */}
-                    <div className="flex flex-wrap gap-2.5">
-                      {groupShowtimes.map((st) => {
-                        const isSelected = selectedShowtime?.showtime_id === st.showtime_id;
-                        const startTimeStr = new Date(st.start_time).toLocaleTimeString('vi-VN', {
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        });
+                {brands.map((brand) => {
+                  const isSelected = selectedBrand === brand;
+                  const count = branches.filter((b) => b.brand_name === brand).length;
 
-                        return (
-                          <button
-                            key={st.showtime_id}
-                            onClick={() => onSelectShowtime(st)}
-                            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-2 ${
-                              isSelected
-                                ? 'bg-emerald-500 text-slate-950 font-black shadow-lg shadow-emerald-500/20 scale-105'
-                                : 'bg-slate-950 text-slate-300 hover:text-white hover:bg-slate-800 border border-slate-800'
-                            }`}
-                          >
-                            <span>{startTimeStr}</span>
-                            {isSelected && <CheckCircle className="w-3.5 h-3.5" />}
-                          </button>
-                        );
-                      })}
-                    </div>
+                  let brandColor = 'text-white';
+                  if (brand.includes('CGV')) brandColor = 'text-rose-400';
+                  else if (brand.includes('Lotte')) brandColor = 'text-red-400';
+                  else if (brand.includes('BHD')) brandColor = 'text-lime-400';
+
+                  return (
+                    <button
+                      key={brand}
+                      type="button"
+                      onClick={() => setSelectedBrand(brand)}
+                      className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 ${
+                        isSelected
+                          ? 'bg-slate-800 text-white border-2 border-emerald-500 shadow-lg shadow-emerald-500/10 font-black'
+                          : 'bg-slate-900 text-slate-300 hover:text-white hover:bg-slate-800 border border-slate-800'
+                      }`}
+                    >
+                      <span className={brandColor}>●</span>
+                      <span>{brand}</span>
+                      <span className="text-[10px] text-slate-400">({count})</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* BƯỚC 2: BỘ LỌC KHU VỰC VÀ CHỌN CHI NHÁNH RẠP */}
+            <div className="space-y-3 p-4 sm:p-5 rounded-2xl bg-slate-900/40 border border-slate-800">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800/80 pb-3">
+                <div className="flex items-center space-x-2">
+                  <MapPin className="w-4 h-4 text-emerald-400" />
+                  <span className="text-xs font-extrabold text-white">
+                    2. Chọn Chi Nhánh Rạp Gần Bạn:
+                  </span>
+                  <span className="text-[11px] text-slate-400 font-medium">
+                    (Mỗi chi nhánh có khung giờ và định dạng chiếu riêng biệt)
+                  </span>
+                </div>
+
+                {/* Filter city pills */}
+                {cities.length > 1 && (
+                  <div className="flex items-center space-x-1.5 text-xs">
+                    <span className="text-slate-400 text-[11px]">Khu vực:</span>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedCity('all')}
+                      className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all ${
+                        selectedCity === 'all'
+                          ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                          : 'bg-slate-800 text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      Tất cả
+                    </button>
+                    {cities.map((city) => (
+                      <button
+                        key={city}
+                        type="button"
+                        onClick={() => setSelectedCity(city)}
+                        className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all ${
+                          selectedCity === city
+                            ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                            : 'bg-slate-800 text-slate-400 hover:text-white'
+                        }`}
+                      >
+                        {city}
+                      </button>
+                    ))}
                   </div>
-                );
-              })}
+                )}
+              </div>
+
+              {/* Grid các chi nhánh */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 pt-1">
+                {filteredBranches.map((branch) => {
+                  const isSelected = activeBranch?.venue_id === branch.venue_id;
+                  const branchStCount = showtimes.filter((st) => {
+                    const vId = st.room?.venue?.venue_id || st.room_id;
+                    return vId === branch.venue_id;
+                  }).length;
+
+                  return (
+                    <div
+                      key={branch.venue_id}
+                      onClick={() => handleSelectBranch(branch)}
+                      className={`p-3.5 rounded-xl border text-left cursor-pointer transition-all flex flex-col justify-between space-y-2.5 ${
+                        isSelected
+                          ? 'bg-slate-900 border-emerald-500 ring-2 ring-emerald-500/30 shadow-lg shadow-emerald-500/10'
+                          : 'bg-slate-950/80 border-slate-800 hover:border-slate-700 hover:bg-slate-900/60'
+                      }`}
+                    >
+                      <div className="space-y-1.5">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-black px-2 py-0.5 rounded bg-slate-800 text-slate-300">
+                            {branch.brand_name}
+                          </span>
+                          <span className="text-[10px] font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                            {branch.city}
+                          </span>
+                        </div>
+
+                        <h4 className="font-extrabold text-sm text-white line-clamp-1">
+                          {branch.venue_name}
+                        </h4>
+
+                        <p className="text-[11px] text-slate-400 line-clamp-2 leading-relaxed flex items-start space-x-1">
+                          <MapPin className="w-3 h-3 text-slate-500 shrink-0 mt-0.5" />
+                          <span>{branch.address}</span>
+                        </p>
+                      </div>
+
+                      <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between text-[11px]">
+                        <span className="text-slate-400 font-medium">
+                          <strong className="text-white">{branchStCount}</strong> suất chiếu
+                        </span>
+                        {isSelected ? (
+                          <span className="text-emerald-400 font-bold flex items-center space-x-1">
+                            <CheckCircle className="w-3.5 h-3.5" />
+                            <span>Đang chọn</span>
+                          </span>
+                        ) : (
+                          <span className="text-slate-400 hover:text-white">Chọn chi nhánh</span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {filteredBranches.length === 0 && (
+                <div className="p-4 text-center text-xs text-slate-400">
+                  Không tìm thấy chi nhánh nào phù hợp với bộ lọc.
+                </div>
+              )}
+            </div>
+
+            {/* BƯỚC 3: HIỂN THỊ CÁC SUẤT CHIẾU THUỘC CHI NHÁNH ĐÃ CHỌN */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <Clock className="w-4 h-4 text-emerald-400" />
+                  <h3 className="text-sm font-extrabold text-white">
+                    3. Suất Chiếu Tại Chi Nhánh:{' '}
+                    <span className="text-emerald-400">{activeBranch?.venue_name}</span>
+                  </h3>
+                </div>
+                <span className="text-xs text-slate-400">
+                  {activeBranchShowtimes.length} khung giờ khả dụng
+                </span>
+              </div>
+
+              {formatList.length === 0 ? (
+                <div className="p-6 text-center bg-slate-900/40 rounded-2xl border border-slate-800 text-xs text-slate-400">
+                  Chi nhánh này hiện chưa có lịch chiếu cho phim đã chọn. Vui lòng chọn chi nhánh khác ở trên.
+                </div>
+              ) : (
+                <div className="space-y-3.5">
+                  {formatList.map((format) => {
+                    const groupShowtimes = formatGroups.get(format) || [];
+
+                    return (
+                      <div
+                        key={format}
+                        className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-3"
+                      >
+                        <div className="flex items-center space-x-2">
+                          <span className="px-2.5 py-0.5 rounded text-xs font-black bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                            {format}
+                          </span>
+                          <span className="text-xs text-slate-400 font-medium">
+                            • {groupShowtimes[0]?.room?.room_name || 'Phòng chiếu rạp'}
+                          </span>
+                        </div>
+
+                        {/* Showtimes Pill List */}
+                        <div className="flex flex-wrap gap-2.5">
+                          {groupShowtimes.map((st) => {
+                            const isSelected = selectedShowtime?.showtime_id === st.showtime_id;
+                            const startTimeStr = new Date(st.start_time).toLocaleTimeString('vi-VN', {
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            });
+
+                            return (
+                              <button
+                                key={st.showtime_id}
+                                type="button"
+                                onClick={() => onSelectShowtime(st)}
+                                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-2 ${
+                                  isSelected
+                                    ? 'bg-emerald-500 text-slate-950 font-black shadow-lg shadow-emerald-500/20 scale-105'
+                                    : 'bg-slate-950 text-slate-300 hover:text-white hover:bg-slate-800 border border-slate-800'
+                                }`}
+                              >
+                                <span>{startTimeStr}</span>
+                                {isSelected && <CheckCircle className="w-3.5 h-3.5" />}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
 
             {/* CTA Continue to Seatmap */}
             <div className="p-5 rounded-2xl bg-gradient-to-r from-slate-900 via-[#0a1420] to-slate-900 border border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div>
+              <div className="space-y-0.5">
                 <span className="text-xs text-slate-400 block">
-                  {selectedShowtime ? `Đã chọn suất ${new Date(selectedShowtime.start_time).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}` : 'Vui lòng chọn khung giờ'}
+                  {selectedShowtime ? (
+                    <>
+                      Đã chọn suất:{' '}
+                      <strong className="text-emerald-400">
+                        {new Date(selectedShowtime.start_time).toLocaleTimeString('vi-VN', {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
+                      </strong>{' '}
+                      ({selectedShowtime.format_type})
+                    </>
+                  ) : (
+                    'Vui lòng chọn khung giờ chiếu'
+                  )}
                 </span>
                 <span className="text-base font-extrabold text-white">
-                  {selectedShowtime?.room?.room_name || event.venue_name}
+                  {activeBranch?.venue_name || event.venue_name}
                 </span>
               </div>
 
@@ -416,3 +734,4 @@ export const EventDetailView: React.FC<EventDetailViewProps> = ({
     </div>
   );
 };
+
