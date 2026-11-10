@@ -78,7 +78,14 @@ export const Navbar: React.FC<NavbarProps> = ({ currentStep = 1 }) => {
           </div>
 
           {/* Quick Actions */}
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-2.5">
+            <Link
+              href="/admin"
+              className="flex items-center space-x-1.5 text-xs font-semibold bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 px-3 py-1.5 rounded-lg border border-rose-500/30 transition-colors"
+            >
+              <span>Quản Trị / Admin</span>
+            </Link>
+
             <div className="hidden lg:flex items-center space-x-1 text-xs text-slate-400 bg-slate-900 px-2.5 py-1 rounded-lg border border-slate-800">
               <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
               <span>Redis Lock Active</span>
