@@ -50,8 +50,10 @@
 * **Zero-Friction Fallback:** Tích hợp sẵn `InMemoryLockManager` tự kích hoạt khi chạy local không có Redis.
 
 ### 2. Mô Phỏng Góc Nhìn Ghế (Seat View Engine)
-* **Khoảng cách:** $\text{Distance} = \sqrt{(X_{seat} - \frac{\text{screen\_width}}{2})^2 + Y_{seat}^2}$
-* **Góc lệch ngang:** $\text{Angle} = \arctan\left(\frac{X_{seat} - \frac{\text{screen\_width}}{2}}{Y_{seat}}\right) \times \frac{180}{\pi}$
+* **Khoảng cách:**
+  $$\text{Distance} = \sqrt{\left(X_{\text{seat}} - \frac{\text{screenWidth}}{2}\right)^2 + Y_{\text{seat}}^2}$$
+* **Góc lệch ngang:**
+  $$\text{Angle} = \arctan\left(\frac{X_{\text{seat}} - \frac{\text{screenWidth}}{2}}{Y_{\text{seat}}}\right) \times \frac{180}{\pi}$$
 * **Canvas Renderer:** Vẽ màn hình cong IMAX phát sáng với điểm tụ (Vanishing Point) dịch chuyển tương ứng theo góc lệch và độ cao sàn $Z$.
 * **Đánh giá tự động:** Xếp hạng 5 sao cho Ghế trung tâm Hoàng Kim, cảnh báo nếu ghế ở quá sát màn hình hoặc góc nghiêng lớn.
 

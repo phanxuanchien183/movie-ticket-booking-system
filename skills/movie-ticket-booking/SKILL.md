@@ -85,9 +85,9 @@ movie-ticket-booking/
 ### Quy Tắc 3: Tính Toán Seat View Engine Đúng Chuẩn Lượng Giác
 * Khi tính toán góc nhìn trong `src/lib/seat-view-engine.ts`:
   * Khoảng cách đến tâm màn hình:
-    $$\text{Distance} = \sqrt{(X_{seat} - \frac{\text{screen\_width}}{2})^2 + Y_{seat}^2}$$
+    $$\text{Distance} = \sqrt{\left(X_{\text{seat}} - \frac{\text{screenWidth}}{2}\right)^2 + Y_{\text{seat}}^2}$$
   * Góc lệch ngang:
-    $$\text{Angle} = \arctan\left(\frac{X_{seat} - \frac{\text{screen\_width}}{2}}{Y_{seat}}\right) \times \frac{180}{\pi}$$
+    $$\text{Angle} = \arctan\left(\frac{X_{\text{seat}} - \frac{\text{screenWidth}}{2}}{Y_{\text{seat}}}\right) \times \frac{180}{\pi}$$
   * Giữ nguyên phân cấp đánh giá chất lượng vị trí ghế:
     * $|\text{Angle}| \le 8^\circ$: Ghế trung tâm Hoàng Kim (5 sao)
     * $8^\circ < |\text{Angle}| \le 18^\circ$: Ghế tiêu chuẩn tốt (4.5 sao)
