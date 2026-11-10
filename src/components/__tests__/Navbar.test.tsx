@@ -38,3 +38,4 @@ describe('Navbar Component (Commercial Navigation Menu)', () => {
     expect(screen.getByText('Truy Cập Trang Quản Trị / Thiết Kế Sơ Đồ')).toBeDefined();
   });
 });
+
