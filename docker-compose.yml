@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  # Next.js Fullstack Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ticket-booking-app
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - MYSQL_HOST=mysql
+      - MYSQL_PORT=3306
+      - MYSQL_USER=ticket_user
+      - MYSQL_PASSWORD=ticket_password
+      - MYSQL_DATABASE=ticket_booking
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: ticket-booking-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: ticket_booking
+      MYSQL_USER: ticket_user
+      MYSQL_PASSWORD: ticket_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./schema/sql:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot_password"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis In-Memory Cache & Seat Lock
+  redis:
+    image: redis:7-alpine
+    container_name: ticket-booking-redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+volumes:
+  mysql_data:
+  redis_data:
