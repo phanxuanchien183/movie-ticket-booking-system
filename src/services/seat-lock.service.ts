@@ -3,9 +3,53 @@ import { db } from '@/lib/db';
 
 const LOCK_TTL_SECONDS = 300; // 5 phút
 
+// Lua script giải phóng khóa nguyên tử (Atomic Check-and-Del chống race-condition)
+const LUA_RELEASE_LOCK = `
+if redis.call("get", KEYS[1]) == ARGV[1] then
+  return redis.call("del", KEYS[1])
+else
+  return 0
+end
+`;
+
 export const seatLockService = {
   getLockKey(showtimeId: number, seatId: string): string {
     return `lock:showtime:${showtimeId}:seat:${seatId}`;
+  },
+
+  /**
+   * Kiểm tra người dùng có còn giữ khóa hợp lệ trước khi checkout (Chống cướp ghế khi hết hạn 300s)
+   */
+  async verifyLockOwnership(
+    showtimeId: number,
+    seatIds: string[],
+    userId: string
+  ): Promise<{ valid: boolean; invalidSeat?: string }> {
+    const redis = getRedisClient();
+    if (redis) {
+      try {
+        for (const seatId of seatIds) {
+          const key = this.getLockKey(showtimeId, seatId);
+          const owner = await redis.get(key);
+          if (owner && owner !== userId.toString()) {
+            return { valid: false, invalidSeat: seatId };
+          }
+        }
+        return { valid: true };
+      } catch (e) {
+        console.warn('[Redis] Lỗi verify lock ownership, fallback memory', e);
+      }
+    }
+
+    for (const seatId of seatIds) {
+      const key = this.getLockKey(showtimeId, seatId);
+      const entry = memoryLockManager.get(key);
+      if (entry && entry.userId !== userId.toString()) {
+        return { valid: false, invalidSeat: seatId };
+      }
+    }
+
+    return { valid: true };
   },
 
   /**
@@ -100,7 +144,7 @@ export const seatLockService = {
   },
 
   /**
-   * Giải phóng ghế đã khóa
+   * Giải phóng ghế đã khóa bằng Atomic Lua Script
    */
   async releaseSeats(showtimeId: number, seatIds: string[], userId: string): Promise<void> {
     const redis = getRedisClient();
@@ -108,25 +152,23 @@ export const seatLockService = {
       try {
         for (const seatId of seatIds) {
           const key = this.getLockKey(showtimeId, seatId);
-          const owner = await redis.get(key);
-          if (owner === userId) {
-            await redis.del(key);
-          }
+          // Thực thi Lua Script nguyên tử: chỉ xóa nếu key đúng thuộc về userId
+          await redis.eval(LUA_RELEASE_LOCK, 1, key, userId.toString());
         }
         return;
       } catch (e) {
-        console.warn('[Redis] Lỗi giải phóng ghế Redis', e);
+        console.warn('[Redis] Lỗi giải phóng ghế Redis qua Lua Script', e);
       }
     }
 
     for (const seatId of seatIds) {
       const key = this.getLockKey(showtimeId, seatId);
-      memoryLockManager.delete(key, userId);
+      memoryLockManager.delete(key, userId.toString());
     }
   },
 
   /**
-   * Lấy danh sách toàn bộ ghế đang bị khóa của suất chiếu
+   * Lấy danh sách toàn bộ ghế đang bị khóa của suất chiếu bằng non-blocking SCAN
    */
   async getLockedSeats(
     showtimeId: number
@@ -137,7 +179,15 @@ export const seatLockService = {
     if (redis) {
       try {
         const pattern = `lock:showtime:${showtimeId}:seat:*`;
-        const keys = await redis.keys(pattern);
+        // Sử dụng non-blocking SCAN thay vì blocking KEYS để bảo vệ hiệu năng Redis
+        let cursor = '0';
+        const keys: string[] = [];
+        do {
+          const [nextCursor, matchedKeys] = await redis.scan(cursor, 'MATCH', pattern, 'COUNT', 100);
+          cursor = nextCursor;
+          keys.push(...matchedKeys);
+        } while (cursor !== '0');
+
         for (const key of keys) {
           const seatId = key.split(':seat:')[1];
           const userId = await redis.get(key);

@@ -87,6 +87,23 @@ export async function POST(req: NextRequest) {
       appliedPromoId = promoResult.promotion?.promo_id || null;
     }
 
+    // 3.5. Kiểm tra quyền sở hữu khóa ghế (Bảo vệ tính toàn vẹn giao dịch, chống race-condition khi hết hạn 300s)
+    const lockVerification = await seatLockService.verifyLockOwnership(
+      showtime_id,
+      seat_ids,
+      user_id
+    );
+    if (!lockVerification.valid) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: `Ghế ${lockVerification.invalidSeat} đã hết thời gian giữ chỗ (300s) hoặc đang được người khác giữ chỗ. Vui lòng chọn lại ghế!`,
+          error_code: 'LOCK_EXPIRED_OR_STOLEN',
+        },
+        { status: 409 }
+      );
+    }
+
     // 4. Tạo mã đơn hàng duy nhất & QR code
     const randomHex = Math.random().toString(36).substring(2, 8).toUpperCase();
     const bookingId = `BK-${Date.now().toString().slice(-6)}-${randomHex}`;

@@ -68,5 +68,23 @@ describe('SeatLockService (High-Concurrency Seat Locking)', () => {
     const locks = await seatLockService.getLockedSeats(showtimeId);
     expect(locks.has('TEST-A01')).toBe(false);
   });
+
+  it('verifyLockOwnership phát hiện chính xác khi ghế bị người khác cướp sau khi hết hạn TTL', async () => {
+    // A khóa ghế A01
+    await seatLockService.lockSeats(showtimeId, ['TEST-A01'], userA);
+
+    // Xác minh A vẫn giữ ghế -> valid
+    const checkA = await seatLockService.verifyLockOwnership(showtimeId, ['TEST-A01'], userA);
+    expect(checkA.valid).toBe(true);
+
+    // Giả lập key của A bị hết hạn và B khóa ghế A01
+    memoryLockManager.delete(seatLockService.getLockKey(showtimeId, 'TEST-A01'));
+    await seatLockService.lockSeats(showtimeId, ['TEST-A01'], userB);
+
+    // Lúc này A cố checkout -> verify phát hiện không còn thuộc sở hữu của A
+    const checkAFailed = await seatLockService.verifyLockOwnership(showtimeId, ['TEST-A01'], userA);
+    expect(checkAFailed.valid).toBe(false);
+    expect(checkAFailed.invalidSeat).toBe('TEST-A01');
+  });
 });
 
