@@ -36,7 +36,7 @@ export const TicketSuccessModal: React.FC<TicketSuccessModalProps> = ({
           <div className="relative rounded-2xl bg-slate-950 border border-slate-800 p-5 space-y-4 shadow-inner">
             {/* Header info */}
             <div>
-              <span className="text-[10px] font-bold tracking-wider text-rose-400 uppercase bg-rose-500/10 px-2 py-0.5 rounded border border-rose-500/20">
+              <span className="text-[10px] font-bold tracking-wider text-emerald-400 uppercase bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
                 Vé Điện Tử / E-Ticket
               </span>
               <h4 className="text-lg font-bold text-white mt-1">
@@ -122,7 +122,7 @@ export const TicketSuccessModal: React.FC<TicketSuccessModalProps> = ({
 
             <button
               onClick={onClose}
-              className="flex-1 py-3 rounded-xl bg-rose-500 hover:bg-rose-600 text-white text-xs font-bold shadow-lg shadow-rose-500/20 flex items-center justify-center space-x-2 transition-colors"
+              className="flex-1 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold shadow-md flex items-center justify-center space-x-2 transition-colors"
             >
               <span>Đặt Thêm Vé Khác</span>
             </button>

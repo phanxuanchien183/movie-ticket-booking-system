@@ -15,7 +15,7 @@ export const seatLockService = {
   async lockSeats(
     showtimeId: number,
     seatIds: string[],
-    userId: number
+    userId: string
   ): Promise<{ success: boolean; lockedSeats: string[]; failedSeat?: string; message?: string }> {
     // 1. Kiểm tra ghế đã bán trong DB chưa
     const bookedSeats = await db.getBookedSeatIds(showtimeId);
@@ -102,14 +102,14 @@ export const seatLockService = {
   /**
    * Giải phóng ghế đã khóa
    */
-  async releaseSeats(showtimeId: number, seatIds: string[], userId: number): Promise<void> {
+  async releaseSeats(showtimeId: number, seatIds: string[], userId: string): Promise<void> {
     const redis = getRedisClient();
     if (redis) {
       try {
         for (const seatId of seatIds) {
           const key = this.getLockKey(showtimeId, seatId);
           const owner = await redis.get(key);
-          if (owner === userId.toString()) {
+          if (owner === userId) {
             await redis.del(key);
           }
         }
@@ -130,8 +130,8 @@ export const seatLockService = {
    */
   async getLockedSeats(
     showtimeId: number
-  ): Promise<Map<string, { userId: number; expiresInSeconds: number }>> {
-    const result = new Map<string, { userId: number; expiresInSeconds: number }>();
+  ): Promise<Map<string, { userId: string; expiresInSeconds: number }>> {
+    const result = new Map<string, { userId: string; expiresInSeconds: number }>();
     const redis = getRedisClient();
 
     if (redis) {
@@ -144,7 +144,7 @@ export const seatLockService = {
           const ttl = await redis.ttl(key);
           if (userId && ttl > 0) {
             result.set(seatId, {
-              userId: Number(userId),
+              userId: userId,
               expiresInSeconds: ttl,
             });
           }

@@ -48,7 +48,7 @@ export async function GET(
     // Gộp trạng thái và bổ sung Seat View Engine
     const enrichedSeats = seats.map((seat) => {
       let status: 'available' | 'locked' | 'booked' = 'available';
-      let lockedByUser: number | null = null;
+      let lockedByUser: string | null = null;
       let lockExpiresIn: number | null = null;
 
       if (bookedSeatIds.includes(seat.seat_id)) {

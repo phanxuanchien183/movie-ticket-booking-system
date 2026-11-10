@@ -24,7 +24,7 @@ export interface Seat {
   coord_y: number;
   coord_z: number;
   status?: SeatStatus;
-  locked_by_user?: number | null;
+  locked_by_user?: string | null;
   lock_expires_in?: number | null; // seconds
   price?: number;
 }
@@ -87,7 +87,7 @@ export interface BookingSeatDetail {
 
 export interface Booking {
   booking_id: string;
-  user_id: number;
+  user_id: string | number;
   customer_name: string;
   customer_email: string;
   customer_phone: string;

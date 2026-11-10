@@ -47,7 +47,7 @@ export function getRedisClient(): Redis | null {
 // ========================================================
 
 interface MemoryLockEntry {
-  userId: number;
+  userId: string;
   expiresAt: number; // timestamp ms
 }
 
@@ -55,7 +55,7 @@ class InMemoryLockManager {
   private locks: Map<string, MemoryLockEntry> = new Map();
 
   constructor() {
-    // Dọn dẹp key hết hạn mỗi 5 giây
+    // Dọn dẹp key hết hạn mỗi 3 giây
     setInterval(() => {
       const now = Date.now();
       for (const [key, entry] of this.locks.entries()) {
@@ -63,11 +63,11 @@ class InMemoryLockManager {
           this.locks.delete(key);
         }
       }
-    }, 5000);
+    }, 3000);
   }
 
   // Tương đương SET key value NX EX ttlSeconds
-  setNX(key: string, userId: number, ttlSeconds: number): boolean {
+  setNX(key: string, userId: string, ttlSeconds: number): boolean {
     const now = Date.now();
     const existing = this.locks.get(key);
 
@@ -84,7 +84,7 @@ class InMemoryLockManager {
     return true;
   }
 
-  get(key: string): { userId: number; ttl: number } | null {
+  get(key: string): { userId: string; ttl: number } | null {
     const now = Date.now();
     const existing = this.locks.get(key);
     if (!existing || existing.expiresAt <= now) {
@@ -97,7 +97,7 @@ class InMemoryLockManager {
     };
   }
 
-  delete(key: string, userId?: number): boolean {
+  delete(key: string, userId?: string): boolean {
     const existing = this.locks.get(key);
     if (!existing) return true;
     if (userId && existing.userId !== userId) return false;
@@ -105,9 +105,9 @@ class InMemoryLockManager {
     return true;
   }
 
-  getAllByPrefix(prefix: string): Map<string, { userId: number; ttl: number }> {
+  getAllByPrefix(prefix: string): Map<string, { userId: string; ttl: number }> {
     const now = Date.now();
-    const result = new Map<string, { userId: number; ttl: number }>();
+    const result = new Map<string, { userId: string; ttl: number }>();
     for (const [k, v] of this.locks.entries()) {
       if (k.startsWith(prefix) && v.expiresAt > now) {
         result.set(k, {

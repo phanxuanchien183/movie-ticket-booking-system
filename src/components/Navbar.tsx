@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Film, Sparkles, ShieldCheck, Code2 } from 'lucide-react';
+import { Ticket, Film, PhoneCall, ShieldCheck, User } from 'lucide-react';
 
 interface NavbarProps {
   currentStep?: number;
@@ -10,27 +10,28 @@ interface NavbarProps {
 
 export const Navbar: React.FC<NavbarProps> = ({ currentStep = 1 }) => {
   const steps = [
-    { num: 1, name: 'Chọn Suất Chiếu' },
-    { num: 2, name: 'Chọn Ghế & Góc Nhìn' },
+    { num: 1, name: 'Chọn Phim & Suất' },
+    { num: 2, name: 'Chọn Ghế Ngồi' },
     { num: 3, name: 'Thanh Toán' },
-    { num: 4, name: 'Vé Điện Tử' },
+    { num: 4, name: 'Nhận Vé Điện Tử' },
   ];
 
   return (
-    <header className="sticky top-0 z-50 backdrop-blur-md bg-slate-950/80 border-b border-slate-800">
+    <header className="sticky top-0 z-50 backdrop-blur-md bg-[#0b0f17]/95 border-b border-slate-800/80 shadow-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          {/* Logo & Brand */}
+          {/* Logo & Brand (Ticketbox Cinema Style) */}
           <Link href="/" className="flex items-center space-x-3 group">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 via-rose-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-rose-500/20 group-hover:scale-105 transition-transform">
-              <Film className="w-5 h-5 text-white" />
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-700 flex items-center justify-center shadow-md shadow-emerald-950 group-hover:scale-105 transition-transform">
+              <Ticket className="w-5 h-5 text-white" />
             </div>
-            <div>
-              <span className="text-lg font-bold bg-gradient-to-r from-white via-slate-200 to-amber-300 bg-clip-text text-transparent">
-                CineTicket Pro
+            <div className="flex flex-col">
+              <span className="text-xl font-extrabold tracking-tight text-white flex items-center">
+                <span>Cine</span>
+                <span className="text-emerald-400">Box</span>
               </span>
-              <span className="hidden sm:inline-block ml-2 text-xs text-rose-400 font-medium px-2 py-0.5 rounded-full bg-rose-500/10 border border-rose-500/20">
-                Fullstack Next.js
+              <span className="text-[10px] text-slate-400 -mt-0.5 tracking-wider uppercase font-semibold">
+                Cổng Đặt Vé Trực Tuyến
               </span>
             </div>
           </Link>
@@ -44,21 +45,21 @@ export const Navbar: React.FC<NavbarProps> = ({ currentStep = 1 }) => {
               return (
                 <React.Fragment key={s.num}>
                   <div
-                    className={`flex items-center space-x-1.5 px-3 py-1 rounded-full text-xs font-medium transition-all ${
+                    className={`flex items-center space-x-2 px-3 py-1 rounded-full text-xs font-semibold transition-all ${
                       isActive
-                        ? 'bg-rose-500/20 text-rose-400 border border-rose-500/40 shadow-sm shadow-rose-500/20'
+                        ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/40'
                         : isPast
-                        ? 'text-emerald-400 bg-emerald-500/10'
+                        ? 'text-slate-300 bg-slate-800/60'
                         : 'text-slate-500'
                     }`}
                   >
                     <span
-                      className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] ${
+                      className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-bold ${
                         isActive
-                          ? 'bg-rose-500 text-white'
+                          ? 'bg-emerald-500 text-slate-950'
                           : isPast
-                          ? 'bg-emerald-500 text-white'
-                          : 'bg-slate-800 text-slate-400'
+                          ? 'bg-slate-700 text-white'
+                          : 'bg-slate-800 text-slate-500'
                       }`}
                     >
                       {isPast ? '✓' : s.num}
@@ -68,7 +69,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentStep = 1 }) => {
                   {idx < steps.length - 1 && (
                     <div
                       className={`w-4 h-[1px] ${
-                        isPast ? 'bg-emerald-500/50' : 'bg-slate-800'
+                        isPast ? 'bg-emerald-500/40' : 'bg-slate-800'
                       }`}
                     />
                   )}
@@ -77,28 +78,19 @@ export const Navbar: React.FC<NavbarProps> = ({ currentStep = 1 }) => {
             })}
           </div>
 
-          {/* Quick Actions */}
-          <div className="flex items-center space-x-2.5">
+          {/* Customer Support & Quick Access */}
+          <div className="flex items-center space-x-3">
+            <div className="hidden lg:flex items-center space-x-2 text-xs text-slate-300 bg-slate-900/80 px-3 py-1.5 rounded-lg border border-slate-800">
+              <PhoneCall className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Hotline: <strong className="text-white font-mono">1900 6408</strong></span>
+            </div>
+
             <Link
               href="/admin"
-              className="flex items-center space-x-1.5 text-xs font-semibold bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 px-3 py-1.5 rounded-lg border border-rose-500/30 transition-colors"
+              className="text-xs text-slate-400 hover:text-white px-2.5 py-1.5 rounded-lg hover:bg-slate-900 transition-colors"
             >
-              <span>Quản Trị / Admin</span>
+              Kênh Đối Tác
             </Link>
-
-            <div className="hidden lg:flex items-center space-x-1 text-xs text-slate-400 bg-slate-900 px-2.5 py-1 rounded-lg border border-slate-800">
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Redis Lock Active</span>
-            </div>
-            <a
-              href="https://github.com/phanxuanchien183/movie-ticket-booking-system"
-              target="_blank"
-              rel="noreferrer"
-              className="flex items-center space-x-2 text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg border border-slate-700 transition-colors"
-            >
-              <Code2 className="w-4 h-4 text-rose-400" />
-              <span className="hidden sm:inline">GitHub Repo</span>
-            </a>
           </div>
         </div>
       </div>

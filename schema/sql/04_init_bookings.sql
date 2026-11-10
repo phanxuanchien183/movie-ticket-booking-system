@@ -3,7 +3,7 @@
 
 CREATE TABLE IF NOT EXISTS bookings (
     booking_id VARCHAR(50) PRIMARY KEY,
-    user_id INT NOT NULL,
+    user_id VARCHAR(100) NOT NULL,
     customer_name VARCHAR(150),
     customer_email VARCHAR(150),
     customer_phone VARCHAR(50),

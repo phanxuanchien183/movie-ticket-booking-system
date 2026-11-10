@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Movie, Showtime, Seat, SeatGeometricView, Booking } from '@/types';
 import { Navbar } from '@/components/Navbar';
 import { MovieSelector } from '@/components/MovieSelector';
@@ -12,12 +12,12 @@ import { TicketSuccessModal } from '@/components/TicketSuccessModal';
 import {
   Film,
   Sparkles,
-  ShieldCheck,
   ChevronRight,
   RefreshCw,
-  Info,
   Clock,
   Ticket,
+  ShieldCheck,
+  CheckCircle,
 } from 'lucide-react';
 
 interface SeatWithView extends Seat {
@@ -25,7 +25,17 @@ interface SeatWithView extends Seat {
 }
 
 export default function Home() {
-  const currentUserId = 1; // Giả lập user đăng nhập
+  // Sinh mã phiên độc quyền cho từng trình duyệt/tab (Phân biệt User A và User B)
+  const [currentUserId, setCurrentUserId] = useState<string>('guest_default');
+
+  useEffect(() => {
+    let stored = sessionStorage.getItem('cinebox_guest_id');
+    if (!stored) {
+      stored = 'guest_' + Math.random().toString(36).substring(2, 11);
+      sessionStorage.setItem('cinebox_guest_id', stored);
+    }
+    setCurrentUserId(stored);
+  }, []);
 
   const [movies, setMovies] = useState<Movie[]>([]);
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
@@ -92,27 +102,47 @@ export default function Home() {
     loadShowtimes();
   }, [selectedMovie]);
 
-  // 3. Fetch sơ đồ ghế khi chọn suất chiếu
-  const fetchSeats = async (showtimeId: number) => {
+  // 3. Fetch sơ đồ ghế với Polling thời gian thực (Cập nhật tức thì giữa User A và User B)
+  const fetchSeats = async (showtimeId: number, isPolling: boolean = false) => {
     try {
       const res = await fetch(`/api/showtimes/${showtimeId}/seats`);
       const data = await res.json();
       if (data.success) {
         setSeats(data.data.seats);
+
+        // Kiểm tra nếu ghế của mình bị hết hạn lock
+        if (isPolling && selectedSeatIds.length > 0) {
+          const validSelected = selectedSeatIds.filter((id) => {
+            const currentSeat = data.data.seats.find((s: SeatWithView) => s.seat_id === id);
+            return currentSeat && currentSeat.status === 'locked' && currentSeat.locked_by_user === currentUserId;
+          });
+
+          if (validSelected.length !== selectedSeatIds.length) {
+            setSelectedSeatIds(validSelected);
+            if (validSelected.length === 0) setLockTimeRemaining(null);
+          }
+        }
       }
     } catch (e) {
       console.error('Lỗi tải ghế:', e);
     }
   };
 
+  // Heartbeat Polling: Tự động đồng bộ ghế mỗi 2.5 giây
   useEffect(() => {
     if (!selectedShowtime) return;
     setSelectedSeatIds([]);
     setLockTimeRemaining(null);
     fetchSeats(selectedShowtime.showtime_id);
-  }, [selectedShowtime]);
 
-  // Xử lý Toggle chọn / bỏ chọn ghế (Gọi Redis Lock API)
+    const interval = setInterval(() => {
+      fetchSeats(selectedShowtime.showtime_id, true);
+    }, 2500);
+
+    return () => clearInterval(interval);
+  }, [selectedShowtime, currentUserId]);
+
+  // Xử lý Toggle chọn / bỏ chọn ghế
   const handleToggleSeat = async (seat: SeatWithView) => {
     if (!selectedShowtime) return;
     setErrorToast(null);
@@ -140,7 +170,7 @@ export default function Home() {
         console.error(e);
       }
     } else {
-      // Khóa ghế qua Redis
+      // Khóa giữ chỗ ghế
       try {
         const res = await fetch('/api/seats/lock', {
           method: 'POST',
@@ -154,15 +184,15 @@ export default function Home() {
 
         const data = await res.json();
         if (!res.ok || !data.success) {
-          setErrorToast(data.error || 'Ghế đang được người khác giữ!');
+          setErrorToast(data.error || 'Ghế vừa có người khác giữ chỗ, vui lòng chọn ghế khác!');
           await fetchSeats(selectedShowtime.showtime_id);
         } else {
           setSelectedSeatIds([...selectedSeatIds, seat.seat_id]);
-          setLockTimeRemaining(300); // 5 phút TTL
+          setLockTimeRemaining(300); // 5 phút
           await fetchSeats(selectedShowtime.showtime_id);
         }
       } catch (e) {
-        setErrorToast('Không thể kết nối dịch vụ khóa ghế.');
+        setErrorToast('Không thể giữ chỗ ghế lúc này. Vui lòng thử lại!');
       }
     }
   };
@@ -170,31 +200,30 @@ export default function Home() {
   const selectedSeatsList = seats.filter((s) => selectedSeatIds.includes(s.seat_id));
   const totalAmount = selectedSeatsList.reduce((sum, s) => sum + (s.price || 90000), 0);
 
-  // Xác định bước tiến trình
   let currentStep = 1;
   if (successBooking) currentStep = 4;
   else if (isCheckoutOpen) currentStep = 3;
   else if (selectedSeatIds.length > 0) currentStep = 2;
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-rose-500 selection:text-white">
+    <div className="min-h-screen bg-[#080c14] text-slate-100 flex flex-col font-sans selection:bg-emerald-500 selection:text-slate-950">
       {/* Top Navigation */}
       <Navbar currentStep={currentStep} />
 
-      {/* Hero Movie Banner */}
+      {/* Commercial Movie Banner */}
       {selectedMovie && (
-        <div className="relative border-b border-slate-800 bg-slate-900/60 overflow-hidden">
+        <div className="relative border-b border-slate-800 bg-[#0c121e] overflow-hidden">
           <div
-            className="absolute inset-0 bg-cover bg-center opacity-15 filter blur-sm scale-105"
+            className="absolute inset-0 bg-cover bg-center opacity-20 filter blur-sm scale-105"
             style={{
               backgroundImage: `url(${selectedMovie.backdrop_url || selectedMovie.poster_url})`,
             }}
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/80 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#080c14] via-[#080c14]/80 to-transparent" />
 
-          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 flex flex-col md:flex-row items-center md:items-start gap-8">
-            {/* Movie Poster */}
-            <div className="w-36 sm:w-44 shrink-0 rounded-2xl overflow-hidden shadow-2xl border border-slate-700/80 ring-4 ring-slate-800/40">
+          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 flex flex-col md:flex-row items-center md:items-start gap-6 sm:gap-8">
+            {/* Poster */}
+            <div className="w-32 sm:w-40 shrink-0 rounded-2xl overflow-hidden shadow-2xl border border-slate-700/80">
               <img
                 src={selectedMovie.poster_url}
                 alt={selectedMovie.title}
@@ -203,12 +232,12 @@ export default function Home() {
             </div>
 
             {/* Movie Details */}
-            <div className="flex-1 text-center md:text-left space-y-3">
+            <div className="flex-1 text-center md:text-left space-y-2.5">
               <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
-                <span className="px-2.5 py-0.5 rounded-md text-xs font-bold bg-amber-500 text-slate-950">
+                <span className="px-2.5 py-0.5 rounded-md text-xs font-black bg-amber-500 text-slate-950">
                   {selectedMovie.age_rating || 'T16'}
                 </span>
-                <span className="px-2.5 py-0.5 rounded-md text-xs font-semibold bg-rose-500/20 text-rose-400 border border-rose-500/30">
+                <span className="px-2.5 py-0.5 rounded-md text-xs font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
                   {selectedMovie.genre}
                 </span>
                 <span className="text-xs text-slate-400">
@@ -216,27 +245,27 @@ export default function Home() {
                 </span>
               </div>
 
-              <h1 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
                 {selectedMovie.title}
               </h1>
 
-              <p className="text-sm text-slate-300 max-w-2xl leading-relaxed line-clamp-3">
+              <p className="text-xs sm:text-sm text-slate-300 max-w-2xl leading-relaxed line-clamp-2">
                 {selectedMovie.description}
               </p>
 
-              {/* Architecture Feature Badges */}
+              {/* Service Badges */}
               <div className="pt-2 flex flex-wrap items-center justify-center md:justify-start gap-3 text-xs text-slate-400">
-                <span className="flex items-center space-x-1.5 px-3 py-1 rounded-full bg-slate-900 border border-slate-800">
-                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Redis Seat Lock (TTL 300s)</span>
+                <span className="flex items-center space-x-1 px-2.5 py-1 rounded-full bg-slate-900 border border-slate-800">
+                  <CheckCircle className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Giữ chỗ độc quyền 5 phút</span>
                 </span>
-                <span className="flex items-center space-x-1.5 px-3 py-1 rounded-full bg-slate-900 border border-slate-800">
-                  <Sparkles className="w-3.5 h-3.5 text-rose-400" />
-                  <span>Seat View Engine (Góc nhìn mô phỏng 3D)</span>
+                <span className="flex items-center space-x-1 px-2.5 py-1 rounded-full bg-slate-900 border border-slate-800">
+                  <CheckCircle className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Xem trước tầm nhìn ghế</span>
                 </span>
-                <span className="flex items-center space-x-1.5 px-3 py-1 rounded-full bg-slate-900 border border-slate-800">
-                  <Ticket className="w-3.5 h-3.5 text-amber-400" />
-                  <span>Ràng buộc thanh toán ngân hàng nghiêm ngặt</span>
+                <span className="flex items-center space-x-1 px-2.5 py-1 rounded-full bg-slate-900 border border-slate-800">
+                  <CheckCircle className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Ưu đãi chủ thẻ ACB & Vietcombank</span>
                 </span>
               </div>
             </div>
@@ -245,16 +274,16 @@ export default function Home() {
       )}
 
       {/* Main Content Area */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10">
-        {/* Error Toast */}
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+        {/* Error Notification */}
         {errorToast && (
-          <div className="p-4 rounded-2xl bg-rose-500/20 border border-rose-500/40 text-rose-300 text-sm flex items-center justify-between shadow-lg animate-in slide-in-from-top duration-300">
+          <div className="p-3.5 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-200 text-xs sm:text-sm flex items-center justify-between shadow-md">
             <span>{errorToast}</span>
             <button
               onClick={() => setErrorToast(null)}
-              className="text-xs font-bold px-2.5 py-1 bg-rose-500 text-white rounded-lg hover:bg-rose-600"
+              className="text-xs font-bold px-2.5 py-1 bg-amber-500 text-slate-950 rounded-lg hover:bg-amber-400"
             >
-              Đã hiểu
+              Đóng
             </button>
           </div>
         )}
@@ -279,19 +308,19 @@ export default function Home() {
           />
         </section>
 
-        {/* 3. Sơ đồ ghế tương tác & Mô phỏng góc nhìn */}
+        {/* 3. Sơ Đồ Ghế Ngồi */}
         {selectedShowtime && (
-          <section className="pt-6 border-t border-slate-800/80 space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <section className="pt-4 border-t border-slate-800/80 space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
-                <h3 className="text-xl font-bold text-white flex items-center space-x-2">
-                  <span>Sơ Đồ Ghế Phòng Chiếu</span>
-                  <span className="text-xs text-slate-400 bg-slate-800 px-2.5 py-0.5 rounded-full">
-                    {selectedShowtime.room?.room_name || 'Rạp 01'}
+                <h3 className="text-base font-extrabold text-white flex items-center space-x-2">
+                  <span>Sơ Đồ Ghế Ngồi</span>
+                  <span className="text-xs text-slate-400 font-normal">
+                    ({selectedShowtime.room?.room_name || 'Rạp 01'})
                   </span>
                 </h3>
-                <p className="text-xs text-slate-400 mt-1">
-                  Click vào ghế để xem góc nhìn mô phỏng hoặc chọn ghế đặt chỗ độc quyền.
+                <p className="text-xs text-slate-400 mt-0.5">
+                  Ghế được đồng bộ trực tiếp theo thời gian thực giữa các khách hàng
                 </p>
               </div>
 
@@ -300,11 +329,11 @@ export default function Home() {
                 className="self-start sm:self-auto flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 text-xs transition-colors"
               >
                 <RefreshCw className="w-3.5 h-3.5" />
-                <span>Làm mới trạng thái ghế</span>
+                <span>Cập nhật ghế</span>
               </button>
             </div>
 
-            <div className="p-6 rounded-3xl bg-slate-900/40 border border-slate-800">
+            <div className="p-5 sm:p-6 rounded-2xl bg-slate-900/40 border border-slate-800">
               <SeatMap
                 seats={seats}
                 selectedSeatIds={selectedSeatIds}
@@ -320,19 +349,18 @@ export default function Home() {
 
       {/* Floating Bottom Bar (Sticky Selection & Checkout CTA) */}
       {selectedSeatIds.length > 0 && selectedShowtime && (
-        <div className="sticky bottom-0 z-40 p-4 backdrop-blur-md bg-slate-950/90 border-t border-slate-800 shadow-2xl animate-in slide-in-from-bottom duration-300">
+        <div className="sticky bottom-0 z-40 p-4 backdrop-blur-md bg-[#090d15]/95 border-t border-slate-800 shadow-2xl animate-in slide-in-from-bottom duration-200">
           <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 flex items-center justify-center font-black text-lg">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 flex items-center justify-center font-black text-base">
                 {selectedSeatIds.length}
               </div>
               <div>
                 <div className="text-xs text-slate-400">
-                  Ghế đã giữ ({selectedSeatIds.join(', ')}):
+                  Ghế đang chọn: <strong className="text-white">{selectedSeatIds.join(', ')}</strong>
                 </div>
-                <div className="text-2xl font-black text-rose-400">
-                  {totalAmount.toLocaleString('vi-VN')}{' '}
-                  <span className="text-xs text-slate-400 font-normal">VNĐ</span>
+                <div className="text-xl font-black text-emerald-400">
+                  {totalAmount.toLocaleString('vi-VN')} đ
                 </div>
               </div>
             </div>
@@ -340,10 +368,10 @@ export default function Home() {
             <div className="flex items-center space-x-3 w-full sm:w-auto">
               <button
                 onClick={() => setIsCheckoutOpen(true)}
-                className="w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-gradient-to-r from-rose-500 via-rose-600 to-amber-500 text-white font-bold text-base shadow-xl shadow-rose-500/25 hover:brightness-110 transition-all flex items-center justify-center space-x-2"
+                className="w-full sm:w-auto px-7 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-sm shadow-lg shadow-emerald-950/40 transition-all flex items-center justify-center space-x-2"
               >
-                <span>Tiếp Tục Thanh Toán</span>
-                <ChevronRight className="w-5 h-5" />
+                <span>Tiến Hành Đặt Vé</span>
+                <ChevronRight className="w-4 h-4" />
               </button>
             </div>
           </div>
@@ -390,11 +418,13 @@ export default function Home() {
         />
       )}
 
-      {/* Footer */}
-      <footer className="border-t border-slate-900 bg-slate-950 py-8 text-center text-xs text-slate-500">
-        <p>Hệ Thống Đặt Vé Xem Phim & Sự Kiện Fullstack Next.js</p>
-        <p className="mt-1">
-          Bản quyền © 2026 phanxuanchien183 • Zod Schemas • Redis Seat Lock • Seat View Engine • Bank Binding Checkout
+      {/* Commercial Footer */}
+      <footer className="border-t border-slate-900 bg-[#060910] py-8 text-center text-xs text-slate-500 space-y-2">
+        <p className="font-semibold text-slate-400">
+          CineBox - Hệ Thống Bán Vé Xem Phim Trực Tuyến Chính Thức
+        </p>
+        <p>
+          Hỗ trợ khách hàng: 1900 6408 • Email: support@cinebox.vn
         </p>
       </footer>
     </div>
