@@ -63,3 +63,4 @@ describe('StageZoneDesigner Component (Admin Concert & Cinema Layout Designer)',
     expect(screen.getByText(/Đã lưu thiết lập sơ đồ và bảng giá vé/)).toBeDefined();
   });
 });
+

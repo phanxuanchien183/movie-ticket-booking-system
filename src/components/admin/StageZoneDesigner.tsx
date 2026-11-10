@@ -887,3 +887,4 @@ export const StageZoneDesigner: React.FC<StageZoneDesignerProps> = ({ onSaveLayo
     </div>
   );
 };
+
