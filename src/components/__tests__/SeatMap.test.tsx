@@ -45,7 +45,7 @@ describe('SeatMap Component (Seat Statuses & Selection)', () => {
     },
   ];
 
-  it('Ghế khả dụng (available) có thể click chọn', () => {
+  it('Ghế khả dụng (available) khi click sẽ mở Popup với 2 tùy chọn: Chọn vị trí này và Xem view 3D', () => {
     const handleToggle = vi.fn();
     const handleOpenView = vi.fn();
 
@@ -63,8 +63,39 @@ describe('SeatMap Component (Seat Statuses & Selection)', () => {
     expect(seat1).toBeDefined();
     expect(seat1?.disabled).toBe(false);
 
+    // Click ghế -> Hiện popup chứa 2 options
     fireEvent.click(seat1!);
+    expect(screen.getByText('Ghế R1-A01')).toBeDefined();
+    expect(screen.getByText('Chọn vị trí này')).toBeDefined();
+    expect(screen.getByText(/Xem góc nhìn/)).toBeDefined();
+
+    // Option 1: Click Chọn vị trí này
+    const selectBtn = screen.getByText('Chọn vị trí này');
+    fireEvent.click(selectBtn);
     expect(handleToggle).toHaveBeenCalledWith(mockSeats[0]);
+  });
+
+  it('Có thể chọn Xem góc nhìn (View 3D) từ Popup lựa chọn ghế', () => {
+    const handleToggle = vi.fn();
+    const handleOpenView = vi.fn();
+
+    render(
+      <SeatMap
+        seats={mockSeats}
+        selectedSeatIds={[]}
+        currentUserId="my_guest_session"
+        onToggleSeat={handleToggle}
+        onOpenSeatView={handleOpenView}
+      />
+    );
+
+    const seat1 = screen.getByText('1').closest('button');
+    fireEvent.click(seat1!);
+
+    // Option 2: Click Xem góc nhìn (View 3D)
+    const viewBtn = screen.getByText(/Xem góc nhìn/);
+    fireEvent.click(viewBtn);
+    expect(handleOpenView).toHaveBeenCalledWith(mockSeats[0]);
   });
 
   it('Ghế đang có người khác giữ chỗ (locked) hoặc đã bán (booked) sẽ bị disabled', () => {

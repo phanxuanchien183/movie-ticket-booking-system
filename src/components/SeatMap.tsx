@@ -60,6 +60,7 @@ export const SeatMap: React.FC<SeatMapProps> = ({
   };
 
   const [hoveredSeat, setHoveredSeat] = useState<SeatWithView | null>(null);
+  const [actionModalSeat, setActionModalSeat] = useState<SeatWithView | null>(null);
 
   return (
     <div className="space-y-6">
@@ -157,7 +158,7 @@ export const SeatMap: React.FC<SeatMapProps> = ({
                           disabled={isBooked || isLockedByOther}
                           onClick={() => {
                             if (!isBooked && !isLockedByOther) {
-                              onToggleSeat(seat);
+                              setActionModalSeat(seat);
                             }
                           }}
                           onMouseEnter={() => setHoveredSeat(seat)}
@@ -288,6 +289,105 @@ export const SeatMap: React.FC<SeatMapProps> = ({
           <span className="text-slate-500">Đã bán</span>
         </div>
       </div>
+
+      {/* Seat Action Popup (2 Options: Chọn vị trí này / Xem góc nhìn View 3D) */}
+      {actionModalSeat && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/75 backdrop-blur-sm animate-in fade-in duration-150"
+          onClick={() => setActionModalSeat(null)}
+        >
+          <div
+            className="relative w-full max-w-sm rounded-2xl bg-slate-900 border border-slate-700/80 p-5 shadow-2xl shadow-black/90 space-y-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-extrabold text-base">
+                  {actionModalSeat.row_name}
+                </div>
+                <div>
+                  <h3 className="font-extrabold text-white text-base">
+                    Ghế {actionModalSeat.seat_id}
+                  </h3>
+                  <p className="text-xs text-slate-400">
+                    Hàng {actionModalSeat.row_name} • Ghế số {actionModalSeat.seat_number}
+                  </p>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setActionModalSeat(null)}
+                className="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center text-sm font-bold transition-colors"
+                title="Đóng popup"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Thông tin chi tiết ghế */}
+            <div className="space-y-2 bg-slate-950/60 p-3.5 rounded-xl border border-slate-800 text-xs">
+              <div className="flex items-center justify-between">
+                <span className="text-slate-400">Phân hạng ghế:</span>
+                <span className="font-bold text-slate-200">
+                  {actionModalSeat.zone_name || actionModalSeat.seat_type}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-slate-400">Giá vé:</span>
+                <span className="font-extrabold text-emerald-400 text-sm">
+                  {actionModalSeat.price?.toLocaleString('vi-VN')} đ
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-slate-400">Tầm nhìn:</span>
+                <span className="text-slate-300 font-medium">
+                  {isConcert ? 'Hướng sân khấu chính' : 'Màn hình trung tâm'}
+                </span>
+              </div>
+            </div>
+
+            {/* 2 Lựa chọn chính (2 Options) */}
+            <div className="space-y-2.5 pt-1">
+              {/* Option 1: Chọn vị trí này */}
+              <button
+                onClick={() => {
+                  const target = actionModalSeat;
+                  setActionModalSeat(null);
+                  onToggleSeat(target);
+                }}
+                className={`w-full py-3 px-4 rounded-xl font-extrabold text-xs sm:text-sm flex items-center justify-center space-x-2 transition-all ${
+                  selectedSeatIds.includes(actionModalSeat.seat_id)
+                    ? 'bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40'
+                    : 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-lg shadow-emerald-500/20'
+                }`}
+              >
+                <Check className="w-4 h-4 stroke-[2.5]" />
+                <span>
+                  {selectedSeatIds.includes(actionModalSeat.seat_id)
+                    ? 'Bỏ chọn vị trí này'
+                    : 'Chọn vị trí này'}
+                </span>
+              </button>
+
+              {/* Option 2: Xem góc nhìn 3D */}
+              <button
+                onClick={() => {
+                  const target = actionModalSeat;
+                  setActionModalSeat(null);
+                  onOpenSeatView(target);
+                }}
+                className="w-full py-3 px-4 rounded-xl font-bold text-xs sm:text-sm bg-slate-800 hover:bg-slate-700 hover:border-emerald-500/40 text-slate-200 border border-slate-700 flex items-center justify-center space-x-2 transition-all"
+              >
+                <Eye className="w-4 h-4 text-emerald-400" />
+                <span>Xem góc nhìn tới {isConcert ? 'Sân khấu' : 'Màn chiếu'} (3D View)</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
