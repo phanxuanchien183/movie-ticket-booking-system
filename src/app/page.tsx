@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { EntertainmentEvent, Showtime, Seat, SeatGeometricView, Booking } from '@/types';
 import { Navbar } from '@/components/Navbar';
 import { MovieSelector } from '@/components/MovieSelector';
@@ -28,6 +29,8 @@ interface SeatWithView extends Seat {
 type ScreenType = 'home' | 'detail' | 'seats';
 
 export default function Home() {
+  const router = useRouter();
+
   // Sinh mã phiên độc quyền cho từng trình duyệt/tab (Phân biệt User A và User B)
   const [currentUserId, setCurrentUserId] = useState<string>('guest_default');
 
@@ -199,22 +202,19 @@ export default function Home() {
 
   const selectedSeatsList = seats.filter((s) => selectedSeatIds.includes(s.seat_id));
 
-  // Handler khi click vào 1 sự kiện trên Trang chủ -> chuyển sang màn hình Chi Tiết (Screen: detail)
+  // Handler khi click vào 1 sự kiện trên Trang chủ -> chuyển sang màn hình Chi Tiết qua Router
   const handleSelectEventFromHome = (event: EntertainmentEvent) => {
-    setSelectedMovie(event);
-    setSelectedSeatIds([]);
-    setLockTimeRemaining(null);
-    setCurrentScreen('detail');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    const id = event.movie_id || event.event_id;
+    router.push(`/events/${id}`);
   };
 
-  // Handler khi từ màn hình Chi Tiết -> chuyển sang màn hình Chọn Ghế (Screen: seats)
+  // Handler khi từ màn hình Chi Tiết -> chuyển sang màn hình Chọn Ghế qua Router
   const handleProceedToSeats = () => {
-    if (!selectedShowtime && showtimes.length > 0) {
-      setSelectedShowtime(showtimes[0]);
+    if (selectedShowtime) {
+      router.push(`/booking/${selectedShowtime.showtime_id}`);
+    } else if (showtimes.length > 0) {
+      router.push(`/booking/${showtimes[0].showtime_id}`);
     }
-    setCurrentScreen('seats');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   // Handler quay lại Trang Chủ

@@ -21,7 +21,7 @@ interface SeatWithView extends Seat {
 }
 
 interface SeatSelectionViewProps {
-  event: EntertainmentEvent;
+  event?: EntertainmentEvent;
   showtime: Showtime;
   seats: SeatWithView[];
   selectedSeatIds: string[];
@@ -47,10 +47,11 @@ export const SeatSelectionView: React.FC<SeatSelectionViewProps> = ({
   onBackToDetail,
   onOpenCheckout,
 }) => {
+  const currentEvent = event || showtime.movie;
   const isConcert = Boolean(
     showtime.room?.is_concert_stage ||
-      event.category === 'concert' ||
-      event.category === 'meeting'
+      currentEvent?.category === 'concert' ||
+      currentEvent?.category === 'meeting'
   );
 
   const selectedSeatsList = seats.filter((s) => selectedSeatIds.includes(s.seat_id));
@@ -81,20 +82,26 @@ export const SeatSelectionView: React.FC<SeatSelectionViewProps> = ({
           </span>
         </div>
 
-        <button
-          onClick={onRefreshSeats}
-          className="flex items-center space-x-1.5 text-xs text-slate-400 hover:text-white bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-800 self-start sm:self-auto"
-        >
-          <RefreshCw className="w-3.5 h-3.5 text-emerald-400" />
-          <span>Làm mới ghế</span>
-        </button>
+        {onRefreshSeats && (
+          <button
+            onClick={onRefreshSeats}
+            className="flex items-center space-x-1.5 text-xs text-slate-400 hover:text-white bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-800 self-start sm:self-auto"
+          >
+            <RefreshCw className="w-3.5 h-3.5 text-emerald-400" />
+            <span>Làm mới ghế</span>
+          </button>
+        )}
       </div>
 
       {/* Summary Event Banner Card */}
       <div className="p-4 sm:p-5 rounded-2xl bg-slate-900/80 border border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center space-x-3.5 min-w-0">
           <div className="w-12 h-16 rounded-xl overflow-hidden shrink-0 border border-slate-700 bg-slate-950">
-            <img src={event.poster_url} alt={event.title} className="w-full h-full object-cover" />
+            <img
+              src={currentEvent?.poster_url || 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=800'}
+              alt={currentEvent?.title || 'Phim'}
+              className="w-full h-full object-cover"
+            />
           </div>
 
           <div className="min-w-0">
@@ -103,12 +110,12 @@ export const SeatSelectionView: React.FC<SeatSelectionViewProps> = ({
                 {showtime.format_type}
               </span>
               <span className="text-xs text-slate-400 truncate">
-                {showtime.room?.room_name || event.venue_name}
+                {showtime.room?.room_name || currentEvent?.venue_name || showtime.room?.venue?.venue_name}
               </span>
             </div>
 
             <h2 className="text-base sm:text-lg font-black text-white truncate mt-0.5">
-              {event.title}
+              {currentEvent?.title || 'Sự Kiện Đặt Vé'}
             </h2>
 
             <div className="flex items-center space-x-3 text-xs text-slate-400 mt-1">
@@ -117,7 +124,9 @@ export const SeatSelectionView: React.FC<SeatSelectionViewProps> = ({
                 <span>{formattedTime}</span>
               </span>
               <span>•</span>
-              <span className="truncate">{event.venue_name}</span>
+              <span className="truncate">
+                {currentEvent?.venue_name || showtime.room?.venue?.venue_name || 'Hệ thống rạp'}
+              </span>
             </div>
           </div>
         </div>
