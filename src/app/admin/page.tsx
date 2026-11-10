@@ -20,10 +20,12 @@ import {
   ArrowLeft,
   Search,
   SlidersHorizontal,
+  Layers,
 } from 'lucide-react';
+import { StageZoneDesigner } from '@/components/admin/StageZoneDesigner';
 
 export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState<'overview' | 'locks' | 'movies' | 'promotions' | 'bookings'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'designer' | 'locks' | 'promotions' | 'bookings'>('overview');
   const [stats, setStats] = useState({
     totalRevenue: 24500000,
     totalBookings: 182,
@@ -172,6 +174,7 @@ export default function AdminDashboard() {
         <div className="flex items-center space-x-2 border-b border-slate-800 pb-4 overflow-x-auto">
           {[
             { id: 'overview', name: 'Tổng Quan Hệ Thống', icon: TrendingUp },
+            { id: 'designer', name: 'Thiết Kế Sơ Đồ & Hạng Vé', icon: Layers },
             { id: 'locks', name: 'Giám Sát Khóa Ghế Redis', icon: Lock, badge: activeLocks.length },
             { id: 'promotions', name: 'Khuyến Mãi & Ngân Hàng', icon: Tag },
             { id: 'bookings', name: 'Lịch Sử Giao Dịch', icon: Ticket },
@@ -324,6 +327,11 @@ export default function AdminDashboard() {
               </div>
             </div>
           </div>
+        )}
+
+        {/* TAB: STAGE & ZONE DESIGNER (Concert, Movie, Meeting) */}
+        {activeTab === 'designer' && (
+          <StageZoneDesigner />
         )}
 
         {/* TAB 2: REDIS SEAT LOCKS MONITOR */}
