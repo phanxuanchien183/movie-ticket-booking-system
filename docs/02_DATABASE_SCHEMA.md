@@ -141,3 +141,4 @@ Lưu trữ thông tin xuất vé, hóa đơn và liên kết ghế.
 * `booking_id`: Chuỗi định danh duy nhất (VD: `BK-123456-A8B9C0`).
 * `payment_status`: Trạng thái đơn: `Pending`, `Paid`, `Cancelled`, `Failed`.
 * `qr_code`: Chuỗi token bảo mật để quét vé tại cổng rạp.
+

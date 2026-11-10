@@ -88,3 +88,4 @@ Lệnh trên sẽ lần lượt thực thi các file trong `schema/sql/`:
 | `REDIS_HOST` | `127.0.0.1` | Hostname Redis Server |
 | `REDIS_PORT` | `6379` | Cổng Redis Server |
 | `REDIS_PASSWORD`| - | Mật khẩu xác thực Redis (nếu có) |
+

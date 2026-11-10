@@ -69,3 +69,4 @@ flowchart TD
 3. **Mã `CINEMA20`:**
    * Giảm giá: **20%** tối đa 50.000 VNĐ cho đơn từ 100.000 VNĐ.
    * Ràng buộc: `bank_code = NULL` (Áp dụng cho tất cả ngân hàng và ví điện tử).
+

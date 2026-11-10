@@ -76,3 +76,4 @@ Modal `SeatViewModal.tsx` lấy kết quả từ `calculateSeatView(...)` để 
 1. **Vanishing Point (Điểm tụ phối cảnh):** Dịch chuyển theo góc $\text{Angle}_{horizontal}$.
 2. **Curved Screen Arc:** Màn hình cong IMAX được vẽ bằng đường cong bậc hai `ctx.quadraticCurveTo(...)`, với độ cong tỷ lệ thuận với khoảng cách nhìn.
 3. **Ambient Light Glow:** Đổ bóng gradient phản xạ từ màn chiếu lên không gian tối của phòng chiếu.
+

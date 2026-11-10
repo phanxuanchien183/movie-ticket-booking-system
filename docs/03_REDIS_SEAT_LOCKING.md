@@ -78,3 +78,4 @@ Khi khách hàng chọn nhiều ghế (VD: đặt 3 ghế gia đình `R1-E06`, `
 * File `src/lib/redis.ts` tích hợp sẵn lớp `InMemoryLockManager`.
 * Mô phỏng chính xác hành vi của Redis với phương thức `setNX(key, userId, ttlSeconds)` và một luồng background worker tự động dọn dẹp các key quá hạn mỗi 5 giây.
 * Khi kết nối `REDIS_URL` hoặc `REDIS_HOST` được thiết lập, hệ thống sẽ tự động chuyển sang ioredis thật mà không cần thay đổi bất kỳ dòng code nào!
+
