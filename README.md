@@ -154,6 +154,24 @@ docker compose up -d --build
 
 ---
 
+## 🧪 Hệ Thống Kiểm Thử Toàn Diện (Testing Suite)
+
+Dự án áp dụng chính sách **Bắt buộc 100% kiểm thử (Mandatory Testing Policy)**. Mọi tính năng, service và component màn hình mới đều đi kèm file test chuyên biệt:
+
+* **Domain Services:** [`seat-lock.service.test.ts`](file:///D:/source/movie-ticket-booking/src/services/__tests__/seat-lock.service.test.ts) (Khóa ghế phân tán, xử lý tranh chấp đồng thời, gia hạn TTL, rollback), [`promotion.service.test.ts`](file:///D:/source/movie-ticket-booking/src/services/__tests__/promotion.service.test.ts) (Ràng buộc ngân hàng ACB/VCB, chặn trần giảm giá, đơn hàng tối thiểu).
+* **Mathematical Engine:** [`seat-view-engine.test.ts`](file:///D:/source/movie-ticket-booking/src/lib/__tests__/seat-view-engine.test.ts) (Công thức lượng giác Pytago, góc lệch tâm, phân cấp định tính 5 sao).
+* **UI Components:** [`SeatMap.test.tsx`](file:///D:/source/movie-ticket-booking/src/components/__tests__/SeatMap.test.tsx), [`ShowtimeSelector.test.tsx`](file:///D:/source/movie-ticket-booking/src/components/__tests__/ShowtimeSelector.test.tsx), [`MovieSelector.test.tsx`](file:///D:/source/movie-ticket-booking/src/components/__tests__/MovieSelector.test.tsx).
+
+```bash
+# Chạy toàn bộ 22/22 test cases
+npm test
+
+# Chạy test ở chế độ theo dõi (Watch mode)
+npm run test:watch
+```
+
+---
+
 ## 🎟️ Dữ Liệu Demo & Mã Khuyến Mãi (Test Scenarios)
 
 | Mã Voucher | Giảm giá | Ràng buộc Ngân hàng | Thử nghiệm phù hợp |
