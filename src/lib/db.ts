@@ -227,6 +227,19 @@ export const mockEvents: (EntertainmentEvent & { movie_id: number })[] = [
     city: 'TP. Hồ Chí Minh',
     price_from: 800000,
     event_dates: '19:30 • 15/11/2026',
+    rating_score: '4.9/5',
+    director: 'Đạo diễn Sân Khấu: Việt Tú • Giám Đốc Âm Nhạc: JustaTee',
+    trailer_youtube_id: 'sayhi2026',
+    rules_notice: 'Mang theo CCCD/VNeID để đối soát vé. Không mang theo nước uống và vật sắc nhọn vào nhà thi đấu.',
+    ticket_tiers: [
+      { name: 'SKY LOUNGE', price: 10000000, color: '#38bdf8', type: 'seated', perks: 'Ghế sofa VIP, Tiệc nhẹ, Quà lưu niệm độc quyền' },
+      { name: 'SVIP A / B', price: 5000000, color: '#06b6d4', type: 'seated', perks: 'Vé Soundcheck, Lối vào ưu tiên' },
+      { name: 'VIP A / B', price: 4000000, color: '#0891b2', type: 'seated', perks: 'Lightstick chính hãng phát sáng' },
+      { name: 'FANZONE A / B', price: 2500000, color: '#6366f1', type: 'standing', perks: 'Sát sàn diễn chính chữ T, không gian cuồng nhiệt' },
+      { name: 'CAT 1A / 1B', price: 2500000, color: '#a855f7', type: 'seated', perks: 'Khán đài trung tâm góc nhìn toàn cảnh' },
+      { name: 'CAT 2A / 2B', price: 1800000, color: '#581c87', type: 'seated' },
+      { name: 'GA 1A / 2A', price: 800000, color: '#64748b', type: 'standing' },
+    ],
   },
   {
     event_id: 102,
@@ -247,6 +260,15 @@ export const mockEvents: (EntertainmentEvent & { movie_id: number })[] = [
     city: 'TP. Hồ Chí Minh',
     price_from: 800000,
     event_dates: '20:00 • 22/11/2026',
+    rating_score: '5.0/5',
+    director: 'M-TP Entertainment',
+    rules_notice: 'Mỗi tài khoản được mua tối đa 4 vé. Trẻ em dưới 12 tuổi phải có người giám hộ đi kèm.',
+    ticket_tiers: [
+      { name: 'VVIP SÂN KHẤU', price: 3500000, color: '#f43f5e', type: 'seated', perks: 'Áo thun Sky Tour, Thẻ đeo lưu niệm' },
+      { name: 'FANZONE TRUNG TÂM', price: 2000000, color: '#6366f1', type: 'standing', perks: 'Khu vực đứng sát thần tượng' },
+      { name: 'KHÁN ĐÀI CAT 1', price: 1200000, color: '#a855f7', type: 'seated' },
+      { name: 'KHÁN ĐÀI CAT 2', price: 800000, color: '#64748b', type: 'seated' },
+    ],
   },
   {
     event_id: 103,
@@ -267,6 +289,13 @@ export const mockEvents: (EntertainmentEvent & { movie_id: number })[] = [
     city: 'Hà Nội',
     price_from: 650000,
     event_dates: '20:00 • 28/11/2026',
+    rating_score: '4.8/5',
+    director: 'Warner Music Vietnam',
+    ticket_tiers: [
+      { name: 'HẠNG VÉ VIP', price: 1800000, color: '#06b6d4', type: 'seated', perks: 'CD Album có chữ ký của Vũ.' },
+      { name: 'HẠNG VÉ CAT 1', price: 1100000, color: '#8b5cf6', type: 'seated' },
+      { name: 'HẠNG VÉ CAT 2', price: 650000, color: '#64748b', type: 'seated' },
+    ],
   },
 
   // 2. PHIM CHIẾU RẠP (CỤM RẠP CGV, LOTTE, BHD)
@@ -276,7 +305,7 @@ export const mockEvents: (EntertainmentEvent & { movie_id: number })[] = [
     title: 'Dune: Hành Tinh Cát - Phần Hai',
     category: 'movie',
     category_label: 'Phim Chiếu Rạp',
-    artists: 'Timothée Chalamet, Zendaya, Rebecca Ferguson',
+    artists: 'Timothée Chalamet, Zendaya, Rebecca Ferguson, Javier Bardem',
     duration_minutes: 166,
     poster_url: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=600&auto=format&fit=crop',
     backdrop_url: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=1200&auto=format&fit=crop',
@@ -289,6 +318,10 @@ export const mockEvents: (EntertainmentEvent & { movie_id: number })[] = [
     city: 'TP. Hồ Chí Minh',
     price_from: 110000,
     event_dates: 'Hằng ngày • Nhiều suất chiếu',
+    rating_score: '4.9/5 Khán Giả',
+    rating_imdb: '8.6/10 IMDb',
+    director: 'Denis Villeneuve',
+    trailer_youtube_id: 'Way9Dexny3w',
   },
   {
     event_id: 2,
@@ -296,7 +329,7 @@ export const mockEvents: (EntertainmentEvent & { movie_id: number })[] = [
     title: 'Oppenheimer',
     category: 'movie',
     category_label: 'Phim Chiếu Rạp',
-    artists: 'Cillian Murphy, Emily Blunt, Robert Downey Jr.',
+    artists: 'Cillian Murphy, Emily Blunt, Robert Downey Jr., Matt Damon',
     duration_minutes: 180,
     poster_url: 'https://images.unsplash.com/photo-1440404653325-ab127d49abc1?q=80&w=600&auto=format&fit=crop',
     backdrop_url: 'https://images.unsplash.com/photo-1478760329108-5c3ed9d495a0?q=80&w=1200&auto=format&fit=crop',
@@ -309,6 +342,10 @@ export const mockEvents: (EntertainmentEvent & { movie_id: number })[] = [
     city: 'TP. Hồ Chí Minh',
     price_from: 110000,
     event_dates: 'Hằng ngày • Nhiều suất chiếu',
+    rating_score: '4.9/5 Khán Giả',
+    rating_imdb: '8.9/10 IMDb',
+    director: 'Christopher Nolan',
+    trailer_youtube_id: 'uYPbbksJxIg',
   },
   {
     event_id: 3,
@@ -329,6 +366,10 @@ export const mockEvents: (EntertainmentEvent & { movie_id: number })[] = [
     city: 'TP. Hồ Chí Minh',
     price_from: 90000,
     event_dates: 'Hằng ngày • Nhiều suất chiếu',
+    rating_score: '4.7/5 Khán Giả',
+    rating_imdb: '7.8/10 IMDb',
+    director: 'Trấn Thành',
+    trailer_youtube_id: 'mai2024',
   },
 
   // 3. FAN MEETING & HỘI NGHỊ QUỐC TẾ
@@ -338,7 +379,7 @@ export const mockEvents: (EntertainmentEvent & { movie_id: number })[] = [
     title: 'K-Pop Star Asia Fan Meeting & Showcase',
     category: 'meeting',
     category_label: 'Fan Meeting',
-    artists: 'Top K-Pop Artists Lineup',
+    artists: 'Kim Seon Ho & Dàn Khách Mời Đặc Biệt',
     duration_minutes: 120,
     poster_url: 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?q=80&w=800&auto=format&fit=crop',
     backdrop_url: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=1200&auto=format&fit=crop',
@@ -351,6 +392,13 @@ export const mockEvents: (EntertainmentEvent & { movie_id: number })[] = [
     city: 'TP. Hồ Chí Minh',
     price_from: 950000,
     event_dates: '18:00 • 05/12/2026',
+    rating_score: '4.9/5',
+    ticket_tiers: [
+      { name: 'VVIP HI-TOUCH', price: 3200000, color: '#f43f5e', type: 'seated', perks: 'Hi-Touch trực tiếp, Photo 1:1, Poster ký tên' },
+      { name: 'VIP ZONE', price: 2100000, color: '#06b6d4', type: 'seated', perks: 'Hi-Touch nhóm, Photocard độc quyền' },
+      { name: 'ZONE CAT 1', price: 1200000, color: '#8b5cf6', type: 'seated' },
+      { name: 'ZONE CAT 2', price: 950000, color: '#64748b', type: 'seated' },
+    ],
   },
 ];
 

@@ -65,6 +65,19 @@ export interface EntertainmentEvent {
   city: string;
   price_from: number;
   event_dates: string;
+  rating_score?: string;
+  rating_imdb?: string;
+  director?: string;
+  trailer_youtube_id?: string;
+  rules_notice?: string;
+  ticket_tiers?: {
+    name: string;
+    price: number;
+    color: string;
+    capacity?: number;
+    perks?: string;
+    type?: 'seated' | 'standing';
+  }[];
 }
 
 // Giữ tương thích ngược với Movie
