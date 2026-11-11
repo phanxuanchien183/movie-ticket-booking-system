@@ -12,7 +12,6 @@ import {
   MapPin,
   Film,
   Music,
-  ShieldCheck,
   RefreshCw,
   Ticket,
   ChevronRight,
@@ -281,11 +280,6 @@ export const SeatSelectionView: React.FC<SeatSelectionViewProps> = ({
               </span>
             </div>
           </div>
-        </div>
-
-        <div className="hidden lg:flex items-center space-x-2 text-xs text-slate-400 bg-slate-950 px-3 py-2 rounded-xl border border-slate-800">
-          <ShieldCheck className="w-4 h-4 text-emerald-400" />
-          <span>Khóa ghế thời gian thực 300s chống double-booking</span>
         </div>
       </div>
 
