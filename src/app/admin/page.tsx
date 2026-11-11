@@ -21,11 +21,48 @@ import {
   Search,
   SlidersHorizontal,
   Layers,
+  LogOut,
+  User,
+  KeyRound,
+  ExternalLink,
+  ChevronRight,
+  Sparkles,
 } from 'lucide-react';
 import { StageZoneDesigner } from '@/components/admin/StageZoneDesigner';
 
 export default function AdminDashboard() {
+  // Requirement 5: Quản lý đăng nhập Admin
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [loginUsername, setLoginUsername] = useState('admin');
+  const [loginPassword, setLoginPassword] = useState('admin123');
+  const [loginError, setLoginError] = useState<string | null>(null);
+
+  // Check login session on mount
+  useEffect(() => {
+    const authStored = sessionStorage.getItem('cineticket_admin_auth');
+    if (authStored === 'true') {
+      setIsAuthenticated(true);
+    }
+  }, []);
+
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (loginUsername === 'admin' && loginPassword === 'admin123') {
+      sessionStorage.setItem('cineticket_admin_auth', 'true');
+      setIsAuthenticated(true);
+      setLoginError(null);
+    } else {
+      setLoginError('Tài khoản hoặc mật khẩu không chính xác! (Mặc định: admin / admin123)');
+    }
+  };
+
+  const handleLogout = () => {
+    sessionStorage.removeItem('cineticket_admin_auth');
+    setIsAuthenticated(false);
+  };
+
   const [activeTab, setActiveTab] = useState<'overview' | 'designer' | 'locks' | 'promotions' | 'bookings'>('overview');
+
   const [stats, setStats] = useState({
     totalRevenue: 24500000,
     totalBookings: 182,
@@ -40,7 +77,7 @@ export default function AdminDashboard() {
       roomName: 'Rạp 01 - Laser IMAX Starlight',
       seatId: 'R1-E07',
       userId: 1,
-      expiresIn: 185, // seconds
+      expiresIn: 185,
       status: 'Active',
     },
     {
@@ -129,384 +166,446 @@ export default function AdminDashboard() {
     },
   ]);
 
-  // Giải phóng khóa cưỡng chế
   const handleForceReleaseLock = (seatId: string) => {
     setActiveLocks((prev) => prev.filter((l) => l.seatId !== seatId));
   };
 
-  return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
-      {/* Admin Top Header */}
-      <header className="sticky top-0 z-50 backdrop-blur-md bg-slate-950/80 border-b border-slate-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center space-x-4">
+  // ========================================================
+  // REQUIREMENT 5: MÀN HÌNH ĐĂNG NHẬP ADMIN (KHI CHƯA AUTH)
+  // ========================================================
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-[#07090e] text-slate-100 flex items-center justify-center p-4 font-sans selection:bg-[#00b14f] selection:text-white">
+        <div className="w-full max-w-md p-8 rounded-3xl bg-[#121620] border border-[#1e2638] shadow-2xl space-y-6">
+          <div className="text-center space-y-2">
+            <div className="w-14 h-14 rounded-2xl bg-[#00b14f]/15 border border-[#00b14f]/30 text-[#00b14f] flex items-center justify-center mx-auto shadow-xl">
+              <KeyRound className="w-7 h-7" />
+            </div>
+            <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight">
+              CINETICKET ADMIN PORTAL
+            </h1>
+            <p className="text-xs text-slate-400">
+              Cổng Quản Trị Hệ Thống Đặt Vé Phim &amp; Sơ Đồ Concert
+            </p>
+          </div>
+
+          {loginError && (
+            <div className="p-3.5 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-300 text-xs text-center font-medium">
+              {loginError}
+            </div>
+          )}
+
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-300">Tên Đăng Nhập</label>
+              <input
+                type="text"
+                value={loginUsername}
+                onChange={(e) => setLoginUsername(e.target.value)}
+                placeholder="Nhập tài khoản admin..."
+                className="w-full px-4 py-3 rounded-xl bg-[#0b0e14] border border-[#1e2638] text-sm text-white focus:outline-none focus:border-[#00b14f] font-mono"
+                required
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-300">Mật Khẩu Quản Trị</label>
+              <input
+                type="password"
+                value={loginPassword}
+                onChange={(e) => setLoginPassword(e.target.value)}
+                placeholder="Nhập mật khẩu..."
+                className="w-full px-4 py-3 rounded-xl bg-[#0b0e14] border border-[#1e2638] text-sm text-white focus:outline-none focus:border-[#00b14f] font-mono"
+                required
+              />
+            </div>
+
+            <button
+              type="submit"
+              className="w-full py-3.5 rounded-xl bg-[#00b14f] hover:bg-[#009643] text-white font-black text-sm shadow-xl shadow-emerald-600/30 transition-all cursor-pointer"
+            >
+              Đăng Nhập Quản Trị Hệ Thống »
+            </button>
+          </form>
+
+          <div className="pt-2 border-t border-[#1e2638] text-center space-y-3">
+            <button
+              type="button"
+              onClick={() => {
+                setLoginUsername('admin');
+                setLoginPassword('admin123');
+              }}
+              className="text-xs font-bold text-[#00b14f] hover:underline"
+            >
+              Điền tài khoản mặc định (admin / admin123)
+            </button>
+
+            <div>
               <Link
                 href="/"
-                className="flex items-center space-x-1.5 text-xs text-slate-400 hover:text-white bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-800 transition-colors"
+                className="inline-flex items-center space-x-1.5 text-xs text-slate-400 hover:text-white"
               >
                 <ArrowLeft className="w-3.5 h-3.5" />
-                <span>Về Trang Đặt Vé</span>
+                <span>Quay lại trang chủ người dùng</span>
               </Link>
-
-              <div className="flex items-center space-x-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-lg font-bold text-white">CineTicket Admin Portal</span>
-                <span className="text-xs text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20 font-mono">
-                  Route: /admin
-                </span>
-              </div>
-            </div>
-
-            <div className="flex items-center space-x-3 text-xs text-slate-400">
-              <div className="flex items-center space-x-1.5 bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-800">
-                <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                <span>Redis Cluster & MySQL 8.0 Connected</span>
-              </div>
             </div>
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ========================================================
+  // REQUIREMENT 6: BỐ CỤC CHUẨN ADMIN:
+  // - HEADER: Logo & User Icon Name
+  // - BÊN TRÁI: Menu
+  // - Ở GIỮA: Content
+  // ========================================================
+  return (
+    <div className="min-h-screen bg-[#07090e] text-slate-100 flex flex-col font-sans selection:bg-[#00b14f] selection:text-white">
+      {/* 1. HEADER (LOGO + USER ICON NAME) */}
+      <header className="h-16 shrink-0 bg-[#0c1017] border-b border-[#1e2638] sticky top-0 z-50 px-4 sm:px-6 flex items-center justify-between">
+        {/* Left: Brand Logo */}
+        <div className="flex items-center space-x-3">
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#00b14f] to-emerald-700 flex items-center justify-center shadow-md">
+            <Ticket className="w-5 h-5 text-white" />
+          </div>
+          <div className="flex flex-col">
+            <span className="font-black text-base tracking-tight text-white flex items-center">
+              <span>Cine</span>
+              <span className="text-[#00b14f]">Ticket</span>
+              <span className="ml-2 text-[10px] bg-rose-500/20 text-rose-400 border border-rose-500/30 px-1.5 py-0.2 rounded font-black uppercase">
+                ADMIN
+              </span>
+            </span>
+            <span className="text-[10px] text-slate-400">Hệ Thống Quản Trị Vé Phim &amp; Sơ Đồ Sân Khấu</span>
+          </div>
+        </div>
+
+        {/* Center: System Status */}
+        <div className="hidden md:flex items-center space-x-3 text-xs text-slate-400">
+          <div className="flex items-center space-x-1.5 px-3 py-1 rounded-lg bg-[#121620] border border-[#1e2638]">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span>Redis 6379 Connected</span>
+          </div>
+          <div className="flex items-center space-x-1.5 px-3 py-1 rounded-lg bg-[#121620] border border-[#1e2638]">
+            <span className="w-2 h-2 rounded-full bg-blue-500" />
+            <span>MySQL 8.0 Active</span>
+          </div>
+        </div>
+
+        {/* Right: User Avatar, Name & Logout */}
+        <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-2.5 bg-[#121620] border border-[#1e2638] px-3 py-1.5 rounded-xl">
+            <div className="w-7 h-7 rounded-lg bg-[#00b14f]/20 border border-[#00b14f]/40 text-[#00b14f] flex items-center justify-center font-black text-xs">
+              AD
+            </div>
+            <div className="text-left hidden sm:block">
+              <span className="text-xs font-bold text-white block leading-tight">
+                Quản trị viên Hệ thống
+              </span>
+              <span className="text-[10px] text-slate-400 block leading-tight">
+                admin@cineticket.vn
+              </span>
+            </div>
+          </div>
+
+          <button
+            onClick={handleLogout}
+            className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-rose-500/20 hover:text-rose-400 text-slate-300 text-xs font-bold transition-colors cursor-pointer border border-slate-700"
+            title="Đăng xuất khỏi trang quản trị"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Đăng xuất</span>
+          </button>
         </div>
       </header>
 
-      {/* Main Admin Content */}
-      <main className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 flex-1">
-        {/* Navigation Tabs */}
-        <div className="flex items-center space-x-2 border-b border-slate-800 pb-4 overflow-x-auto">
-          {[
-            { id: 'overview', name: 'Tổng Quan Hệ Thống', icon: TrendingUp },
-            { id: 'designer', name: 'Thiết Kế Sơ Đồ & Hạng Vé', icon: Layers },
-            { id: 'locks', name: 'Giám Sát Khóa Ghế Redis', icon: Lock, badge: activeLocks.length },
-            { id: 'promotions', name: 'Khuyến Mãi & Ngân Hàng', icon: Tag },
-            { id: 'bookings', name: 'Lịch Sử Giao Dịch', icon: Ticket },
-          ].map((tab) => {
-            const Icon = tab.icon;
-            const isActive = activeTab === tab.id;
+      {/* 2. BODY SPLIT: BÊN TRÁI LÀ MENU, Ở GIỮA LÀ CONTENT */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* BÊN TRÁI: MENU SIDEBAR (w-64) */}
+        <aside className="w-64 shrink-0 bg-[#0c1017] border-r border-[#1e2638] flex flex-col justify-between p-4 overflow-y-auto">
+          <div className="space-y-6">
+            <div className="text-[10px] font-black uppercase tracking-wider text-slate-500 px-3">
+              Menu Điều Hành
+            </div>
 
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
-                className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
-                  isActive
-                    ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/20'
-                    : 'bg-slate-900 text-slate-400 hover:text-slate-200 hover:bg-slate-800 border border-slate-800'
-                }`}
-              >
-                <Icon className="w-4 h-4" />
-                <span>{tab.name}</span>
-                {tab.badge !== undefined && (
-                  <span
-                    className={`px-1.5 py-0.2 rounded-full text-[10px] ${
-                      isActive ? 'bg-white text-rose-600' : 'bg-rose-500 text-white'
+            <nav className="space-y-1.5">
+              {[
+                { id: 'overview', name: 'Tổng Quan Hệ Thống', icon: TrendingUp },
+                { id: 'designer', name: 'Thiết Kế Sơ Đồ & Hạng Vé', icon: Layers, badge: 'Mục 1 & 2' },
+                { id: 'locks', name: 'Giám Sát Khóa Ghế Redis', icon: Lock, count: activeLocks.length },
+                { id: 'promotions', name: 'Khuyến Mãi & Ngân Hàng', icon: Tag, count: promotions.length },
+                { id: 'bookings', name: 'Lịch Sử Giao Dịch', icon: Ticket, count: recentBookings.length },
+              ].map((item) => {
+                const Icon = item.icon;
+                const isActive = activeTab === item.id;
+
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => setActiveTab(item.id as any)}
+                    className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                      isActive
+                        ? 'bg-[#00b14f] text-white shadow-lg shadow-emerald-600/25'
+                        : 'text-slate-400 hover:text-white hover:bg-[#121620]'
                     }`}
                   >
-                    {tab.badge}
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </div>
-
-        {/* TAB 1: OVERVIEW */}
-        {activeTab === 'overview' && (
-          <div className="space-y-6">
-            {/* KPI Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-1">
-                <div className="flex items-center justify-between text-slate-400 text-xs">
-                  <span>Tổng Doanh Thu</span>
-                  <DollarSign className="w-4 h-4 text-emerald-400" />
-                </div>
-                <div className="text-2xl font-black text-white">
-                  {stats.totalRevenue.toLocaleString('vi-VN')} <span className="text-xs font-normal text-slate-400">VNĐ</span>
-                </div>
-                <div className="text-[11px] text-emerald-400">↑ 18.5% so với tuần trước</div>
-              </div>
-
-              <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-1">
-                <div className="flex items-center justify-between text-slate-400 text-xs">
-                  <span>Vé Đã Xuất</span>
-                  <Ticket className="w-4 h-4 text-rose-400" />
-                </div>
-                <div className="text-2xl font-black text-white">{stats.totalBookings}</div>
-                <div className="text-[11px] text-slate-400">Giao dịch thành công</div>
-              </div>
-
-              <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-1">
-                <div className="flex items-center justify-between text-slate-400 text-xs">
-                  <span>Khóa Ghế Đang Giữ</span>
-                  <Lock className="w-4 h-4 text-amber-400" />
-                </div>
-                <div className="text-2xl font-black text-amber-400">{activeLocks.length}</div>
-                <div className="text-[11px] text-amber-300">Redis TTL active (5 phút)</div>
-              </div>
-
-              <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-1">
-                <div className="flex items-center justify-between text-slate-400 text-xs">
-                  <span>Tỷ Lệ Lấp Đầy Ghế</span>
-                  <TrendingUp className="w-4 h-4 text-indigo-400" />
-                </div>
-                <div className="text-2xl font-black text-indigo-400">{stats.occupancyRate}%</div>
-                <div className="text-[11px] text-indigo-300">Rạp Laser IMAX Starlight</div>
-              </div>
-            </div>
-
-            {/* Quick overview tables */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Active Redis locks quick view */}
-              <div className="p-6 rounded-2xl bg-slate-900/40 border border-slate-800 space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="font-bold text-white text-base flex items-center space-x-2">
-                    <Lock className="w-4 h-4 text-amber-400" />
-                    <span>Ghế Đang Giữ Chỗ (Redis Live)</span>
-                  </h3>
-                  <button
-                    onClick={() => setActiveTab('locks')}
-                    className="text-xs text-rose-400 hover:underline"
-                  >
-                    Xem chi tiết →
-                  </button>
-                </div>
-
-                <div className="space-y-2">
-                  {activeLocks.map((lock) => (
-                    <div
-                      key={lock.seatId}
-                      className="p-3 rounded-xl bg-slate-950 border border-slate-800/80 flex items-center justify-between text-xs"
-                    >
-                      <div>
-                        <span className="font-bold text-white mr-2">Ghế {lock.seatId}</span>
-                        <span className="text-slate-400">{lock.movieTitle}</span>
-                      </div>
-                      <div className="flex items-center space-x-2 text-amber-400 font-mono">
-                        <Clock className="w-3.5 h-3.5" />
-                        <span>{lock.expiresIn}s còn lại</span>
-                      </div>
+                    <div className="flex items-center space-x-2.5">
+                      <Icon className="w-4 h-4" />
+                      <span>{item.name}</span>
                     </div>
-                  ))}
+
+                    {item.count !== undefined && (
+                      <span
+                        className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono ${
+                          isActive ? 'bg-white text-slate-900 font-black' : 'bg-[#1e2638] text-slate-300'
+                        }`}
+                      >
+                        {item.count}
+                      </span>
+                    )}
+
+                    {item.badge && (
+                      <span
+                        className={`px-1.5 py-0.2 rounded text-[9px] font-bold ${
+                          isActive ? 'bg-white text-slate-900' : 'bg-emerald-500/20 text-[#00b14f]'
+                        }`}
+                      >
+                        {item.badge}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </nav>
+          </div>
+
+          {/* Bottom link to consumer site */}
+          <div className="pt-4 border-t border-[#1e2638]">
+            <Link
+              href="/"
+              className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white hover:bg-[#121620] transition-colors"
+            >
+              <div className="flex items-center space-x-2">
+                <ExternalLink className="w-4 h-4 text-[#00b14f]" />
+                <span>Xem Trang Người Dùng</span>
+              </div>
+              <ChevronRight className="w-3.5 h-3.5 text-slate-600" />
+            </Link>
+          </div>
+        </aside>
+
+        {/* Ở GIỮA: CONTENT WORKSPACE */}
+        <main className="flex-1 overflow-y-auto p-6 lg:p-8 space-y-6 bg-[#07090e]">
+          {/* TAB 1: OVERVIEW */}
+          {activeTab === 'overview' && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="p-5 rounded-2xl bg-[#121620] border border-[#1e2638] space-y-1">
+                  <div className="flex items-center justify-between text-slate-400 text-xs font-bold">
+                    <span>Tổng Doanh Thu</span>
+                    <DollarSign className="w-4 h-4 text-[#00b14f]" />
+                  </div>
+                  <div className="text-2xl font-black text-white font-mono">
+                    {stats.totalRevenue.toLocaleString('vi-VN')}{' '}
+                    <span className="text-xs font-normal text-slate-400">VNĐ</span>
+                  </div>
+                  <div className="text-[11px] text-[#00b14f] font-semibold">↑ 18.5% so với tuần trước</div>
+                </div>
+
+                <div className="p-5 rounded-2xl bg-[#121620] border border-[#1e2638] space-y-1">
+                  <div className="flex items-center justify-between text-slate-400 text-xs font-bold">
+                    <span>Vé Đã Xuất</span>
+                    <Ticket className="w-4 h-4 text-rose-400" />
+                  </div>
+                  <div className="text-2xl font-black text-white font-mono">{stats.totalBookings}</div>
+                  <div className="text-[11px] text-slate-400">Giao dịch thành công</div>
+                </div>
+
+                <div className="p-5 rounded-2xl bg-[#121620] border border-[#1e2638] space-y-1">
+                  <div className="flex items-center justify-between text-slate-400 text-xs font-bold">
+                    <span>Khóa Ghế Đang Giữ</span>
+                    <Lock className="w-4 h-4 text-amber-400" />
+                  </div>
+                  <div className="text-2xl font-black text-amber-400 font-mono">{activeLocks.length}</div>
+                  <div className="text-[11px] text-amber-300">Redis TTL active (5 phút)</div>
+                </div>
+
+                <div className="p-5 rounded-2xl bg-[#121620] border border-[#1e2638] space-y-1">
+                  <div className="flex items-center justify-between text-slate-400 text-xs font-bold">
+                    <span>Tỷ Lệ Lấp Đầy Ghế</span>
+                    <TrendingUp className="w-4 h-4 text-indigo-400" />
+                  </div>
+                  <div className="text-2xl font-black text-indigo-400 font-mono">{stats.occupancyRate}%</div>
+                  <div className="text-[11px] text-slate-400">Trung bình các suất chiếu</div>
                 </div>
               </div>
 
-              {/* Recent Bookings quick view */}
-              <div className="p-6 rounded-2xl bg-slate-900/40 border border-slate-800 space-y-4">
+              {/* Recent Bookings Table */}
+              <div className="p-6 rounded-2xl bg-[#121620] border border-[#1e2638] space-y-4">
                 <div className="flex items-center justify-between">
-                  <h3 className="font-bold text-white text-base flex items-center space-x-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                    <span>Đơn Đặt Vé Mới Nhất</span>
-                  </h3>
+                  <h3 className="text-base font-extrabold text-white">Giao Dịch Đặt Vé Gần Đây</h3>
                   <button
                     onClick={() => setActiveTab('bookings')}
-                    className="text-xs text-rose-400 hover:underline"
+                    className="text-xs font-bold text-[#00b14f] hover:underline"
                   >
-                    Xem tất cả →
+                    Xem tất cả giao dịch »
                   </button>
                 </div>
 
-                <div className="space-y-2">
-                  {recentBookings.map((b) => (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-xs text-left">
+                    <thead className="bg-[#0b0e14] text-slate-400 font-bold uppercase tracking-wider">
+                      <tr>
+                        <th className="p-3">Mã Đặt Vé</th>
+                        <th className="p-3">Khách Hàng</th>
+                        <th className="p-3">Sự Kiện / Phim</th>
+                        <th className="p-3">Vị Trí Ghế</th>
+                        <th className="p-3">Thanh Toán</th>
+                        <th className="p-3">Số Tiền</th>
+                        <th className="p-3">Trạng Thái</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[#1e2638]">
+                      {recentBookings.map((b) => (
+                        <tr key={b.id} className="hover:bg-[#1a2233]/40">
+                          <td className="p-3 font-mono font-bold text-white">{b.id}</td>
+                          <td className="p-3 font-medium text-slate-200">{b.customerName}</td>
+                          <td className="p-3 font-semibold text-slate-300">{b.movie}</td>
+                          <td className="p-3 font-mono text-emerald-400">{b.seats}</td>
+                          <td className="p-3 text-slate-400">{b.paymentMethod}</td>
+                          <td className="p-3 font-mono font-bold text-white">
+                            {b.finalAmount.toLocaleString('vi-VN')} đ
+                          </td>
+                          <td className="p-3">
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-500/20 text-[#00b14f] border border-emerald-500/30">
+                              ĐÃ THANH TOÁN
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 2: DESIGNER (STAGE ZONE DESIGNER - REQUIREMENTS 7 & 8) */}
+          {activeTab === 'designer' && (
+            <div>
+              <StageZoneDesigner />
+            </div>
+          )}
+
+          {/* TAB 3: LOCKS */}
+          {activeTab === 'locks' && (
+            <div className="space-y-4">
+              <div className="p-6 rounded-2xl bg-[#121620] border border-[#1e2638] space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-base font-bold text-white">Giám Sát Khóa Ghế Thời Gian Thực (Redis Key Manager)</h3>
+                  <span className="text-xs font-mono text-amber-400 bg-amber-500/10 px-2.5 py-1 rounded-lg border border-amber-500/20">
+                    TTL 300s Tự Động Giải Phóng
+                  </span>
+                </div>
+
+                <div className="space-y-3">
+                  {activeLocks.map((lock, idx) => (
                     <div
-                      key={b.id}
-                      className="p-3 rounded-xl bg-slate-950 border border-slate-800/80 flex items-center justify-between text-xs"
+                      key={idx}
+                      className="p-4 rounded-xl bg-[#0b0e14] border border-[#1e2638] flex flex-col sm:flex-row items-center justify-between gap-3"
                     >
-                      <div>
-                        <div className="font-bold text-white">{b.customerName}</div>
-                        <div className="text-slate-400">
-                          {b.seats} • {b.paymentMethod}
+                      <div className="flex items-center space-x-3">
+                        <Lock className="w-5 h-5 text-amber-400 shrink-0" />
+                        <div>
+                          <div className="font-bold text-sm text-white">
+                            Ghế: <span className="font-mono text-emerald-400">{lock.seatId}</span> • {lock.movieTitle}
+                          </div>
+                          <div className="text-xs text-slate-400">
+                            {lock.roomName} • Người dùng ID: {lock.userId}
+                          </div>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <div className="font-bold text-emerald-400">
-                          {b.finalAmount.toLocaleString('vi-VN')} đ
-                        </div>
-                        <div className="text-slate-500 text-[10px]">{b.time}</div>
+
+                      <div className="flex items-center space-x-3">
+                        <span className="text-xs font-mono font-bold text-amber-300">
+                          Còn lại: {lock.expiresIn}s
+                        </span>
+                        <button
+                          onClick={() => handleForceReleaseLock(lock.seatId)}
+                          className="px-3 py-1.5 rounded-lg bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-bold hover:bg-rose-500/30 transition-colors cursor-pointer"
+                        >
+                          Giải Phóng Khóa
+                        </button>
                       </div>
                     </div>
                   ))}
                 </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* TAB: STAGE & ZONE DESIGNER (Concert, Movie, Meeting) */}
-        {activeTab === 'designer' && (
-          <StageZoneDesigner />
-        )}
-
-        {/* TAB 2: REDIS SEAT LOCKS MONITOR */}
-        {activeTab === 'locks' && (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-lg font-bold text-white">Giám Sát Khóa Ghế Thời Gian Thực (Redis Key Manager)</h3>
-                <p className="text-xs text-slate-400">
-                  Key pattern: <code className="text-rose-400">lock:showtime:&#123;id&#125;:seat:&#123;id&#125;</code> với TTL tự hủy 300s.
-                </p>
+          {/* TAB 4: PROMOTIONS */}
+          {activeTab === 'promotions' && (
+            <div className="p-6 rounded-2xl bg-[#121620] border border-[#1e2638] space-y-4">
+              <h3 className="text-base font-bold text-white">Chính Sách Khuyến Mãi &amp; Liên Kết Ngân Hàng</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {promotions.map((p) => (
+                  <div key={p.code} className="p-4 rounded-xl bg-[#0b0e14] border border-[#1e2638] space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono font-black text-sm text-[#00b14f] bg-emerald-500/10 px-2.5 py-0.5 rounded border border-emerald-500/30">
+                        {p.code}
+                      </span>
+                      <span className="text-xs font-bold text-slate-400">{p.bankCode}</span>
+                    </div>
+                    <div className="font-bold text-sm text-white">{p.title}</div>
+                    <div className="text-xs text-slate-400">Mức giảm: {p.discount}</div>
+                    <div className="text-xs text-slate-400">Đã dùng: {p.used} / {p.limit}</div>
+                  </div>
+                ))}
               </div>
-
-              <span className="text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-1 rounded-lg">
-                Đang lắng nghe cụm Redis
-              </span>
             </div>
+          )}
 
-            <div className="rounded-2xl border border-slate-800 overflow-hidden bg-slate-900/40">
-              <table className="w-full text-left text-xs">
-                <thead className="bg-slate-950 text-slate-400 border-b border-slate-800 font-semibold">
-                  <tr>
-                    <th className="p-4">Mã Ghế</th>
-                    <th className="p-4">Suất Chiếu & Phim</th>
-                    <th className="p-4">Phòng Chiếu</th>
-                    <th className="p-4">User ID</th>
-                    <th className="p-4">TTL Còn Lại</th>
-                    <th className="p-4 text-right">Thao Tác Quản Trị</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-800/60">
-                  {activeLocks.map((lock) => (
-                    <tr key={lock.seatId} className="hover:bg-slate-900/60">
-                      <td className="p-4 font-black text-rose-400 text-sm">{lock.seatId}</td>
-                      <td className="p-4 font-medium text-white">{lock.movieTitle}</td>
-                      <td className="p-4 text-slate-400">{lock.roomName}</td>
-                      <td className="p-4 font-mono text-slate-300">USER_{lock.userId}</td>
-                      <td className="p-4 text-amber-400 font-mono font-bold flex items-center space-x-1">
-                        <Clock className="w-3.5 h-3.5" />
-                        <span>{lock.expiresIn} giây</span>
-                      </td>
-                      <td className="p-4 text-right">
-                        <button
-                          onClick={() => handleForceReleaseLock(lock.seatId)}
-                          className="px-3 py-1.5 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 font-semibold text-xs transition-colors"
-                        >
-                          Giải Phóng Khóa Cưỡng Chế
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                  {activeLocks.length === 0 && (
+          {/* TAB 5: BOOKINGS */}
+          {activeTab === 'bookings' && (
+            <div className="p-6 rounded-2xl bg-[#121620] border border-[#1e2638] space-y-4">
+              <h3 className="text-base font-bold text-white">Toàn Bộ Lịch Sử Đặt Vé</h3>
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs text-left">
+                  <thead className="bg-[#0b0e14] text-slate-400 font-bold uppercase">
                     <tr>
-                      <td colSpan={6} className="p-8 text-center text-slate-500">
-                        Hiện không có ghế nào đang bị khóa. Mọi ghế đều ở trạng thái tự do.
-                      </td>
+                      <th className="p-3">Mã Vé</th>
+                      <th className="p-3">Khách Hàng</th>
+                      <th className="p-3">Sự Kiện</th>
+                      <th className="p-3">Ghế</th>
+                      <th className="p-3">Phương Thức</th>
+                      <th className="p-3">Tổng Tiền</th>
+                      <th className="p-3">Thời Gian</th>
                     </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
-        {/* TAB 3: PROMOTIONS & BANK BINDING */}
-        {activeTab === 'promotions' && (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-lg font-bold text-white">Chính Sách Khuyến Mãi & Ràng Buộc Ngân Hàng</h3>
-                <p className="text-xs text-slate-400">
-                  Kiểm duyệt thanh toán khắt khe: Bắt buộc thẻ hoặc cổng thanh toán của ngân hàng đối tác.
-                </p>
+                  </thead>
+                  <tbody className="divide-y divide-[#1e2638]">
+                    {recentBookings.map((b) => (
+                      <tr key={b.id} className="hover:bg-[#1a2233]/40">
+                        <td className="p-3 font-mono font-bold text-white">{b.id}</td>
+                        <td className="p-3 text-slate-200">{b.customerName}</td>
+                        <td className="p-3 text-slate-300">{b.movie}</td>
+                        <td className="p-3 font-mono text-emerald-400">{b.seats}</td>
+                        <td className="p-3 text-slate-400">{b.paymentMethod}</td>
+                        <td className="p-3 font-mono font-bold text-white">
+                          {b.finalAmount.toLocaleString('vi-VN')} đ
+                        </td>
+                        <td className="p-3 text-slate-400">{b.time}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
-
-            <div className="rounded-2xl border border-slate-800 overflow-hidden bg-slate-900/40">
-              <table className="w-full text-left text-xs">
-                <thead className="bg-slate-950 text-slate-400 border-b border-slate-800 font-semibold">
-                  <tr>
-                    <th className="p-4">Mã Code</th>
-                    <th className="p-4">Tên Chương Trình</th>
-                    <th className="p-4">Ràng Buộc Ngân Hàng</th>
-                    <th className="p-4">Mức Giảm</th>
-                    <th className="p-4">Đơn Tối Thiểu</th>
-                    <th className="p-4">Đã Dùng / Giới Hạn</th>
-                    <th className="p-4">Trạng Thái</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-800/60">
-                  {promotions.map((p) => (
-                    <tr key={p.code} className="hover:bg-slate-900/60">
-                      <td className="p-4 font-mono font-bold text-amber-400 text-sm">{p.code}</td>
-                      <td className="p-4 font-medium text-white">{p.title}</td>
-                      <td className="p-4">
-                        <span
-                          className={`px-2 py-0.5 rounded text-[11px] font-bold ${
-                            p.bankCode === 'ACB'
-                              ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30'
-                              : p.bankCode === 'VCB'
-                              ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-                              : 'bg-slate-800 text-slate-400'
-                          }`}
-                        >
-                          {p.bankCode}
-                        </span>
-                      </td>
-                      <td className="p-4 font-semibold text-rose-400">{p.discount}</td>
-                      <td className="p-4 text-slate-300">{p.minOrder}</td>
-                      <td className="p-4 text-slate-400">
-                        {p.used} / {p.limit} lượt
-                      </td>
-                      <td className="p-4">
-                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                          {p.status}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
-        {/* TAB 4: BOOKINGS */}
-        {activeTab === 'bookings' && (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-lg font-bold text-white">Lịch Sử Giao Dịch & Đơn Đặt Vé</h3>
-                <p className="text-xs text-slate-400">
-                  Toàn bộ giao dịch đặt vé đã được lưu vào MySQL Transaction và cấp mã QR.
-                </p>
-              </div>
-            </div>
-
-            <div className="rounded-2xl border border-slate-800 overflow-hidden bg-slate-900/40">
-              <table className="w-full text-left text-xs">
-                <thead className="bg-slate-950 text-slate-400 border-b border-slate-800 font-semibold">
-                  <tr>
-                    <th className="p-4">Mã Đơn</th>
-                    <th className="p-4">Khách Hàng</th>
-                    <th className="p-4">Phim</th>
-                    <th className="p-4">Ghế</th>
-                    <th className="p-4">Phương Thức</th>
-                    <th className="p-4">Số Tiền</th>
-                    <th className="p-4">Trạng Thái</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-800/60">
-                  {recentBookings.map((b) => (
-                    <tr key={b.id} className="hover:bg-slate-900/60">
-                      <td className="p-4 font-mono font-bold text-rose-400">{b.id}</td>
-                      <td className="p-4 font-semibold text-white">{b.customerName}</td>
-                      <td className="p-4 text-slate-300">{b.movie}</td>
-                      <td className="p-4 font-bold text-amber-300">{b.seats}</td>
-                      <td className="p-4 text-slate-400">{b.paymentMethod}</td>
-                      <td className="p-4 font-bold text-emerald-400 text-sm">
-                        {b.finalAmount.toLocaleString('vi-VN')} VNĐ
-                      </td>
-                      <td className="p-4">
-                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                          {b.status}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-      </main>
+          )}
+        </main>
+      </div>
     </div>
   );
 }
-

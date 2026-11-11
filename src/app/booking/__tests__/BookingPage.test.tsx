@@ -107,9 +107,9 @@ describe('BookingPage Route Component (/booking/[showtimeId])', () => {
       expect(screen.getByText('Dune: Hành Tinh Cát 2')).toBeDefined();
     });
 
-    // Kiểm tra nút quay lại màn hình chi tiết gọi router.push('/events/1')
+    // Kiểm tra nút quay lại màn hình chi tiết gọi router.push('/movies/1')
     const backBtn = screen.getByText('Quay lại thông tin sự kiện');
     fireEvent.click(backBtn);
-    expect(mockPush).toHaveBeenCalledWith('/events/1');
+    expect(mockPush).toHaveBeenCalledWith('/movies/1');
   });
 });

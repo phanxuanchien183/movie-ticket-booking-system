@@ -91,13 +91,6 @@ export const Navbar: React.FC<NavbarProps> = ({
         { label: 'Vietcombank Digibank: Giảm 30K', desc: 'Mã VCB30K cho đơn từ 180k' },
       ],
     },
-    {
-      id: 'admin_designer',
-      label: 'Thiết Kế Sơ Đồ',
-      icon: Layers,
-      href: '/admin',
-      badge: 'Admin',
-    },
   ];
 
   const handleMenuClick = (item: any) => {
@@ -125,18 +118,8 @@ export const Navbar: React.FC<NavbarProps> = ({
           <div className="hidden md:flex items-center space-x-4 shrink-0 text-slate-400">
             <div className="flex items-center space-x-1.5">
               <PhoneCall className="w-3 h-3 text-emerald-400" />
-              <span>Hotline: <strong className="text-white font-mono">1900 6408</strong> (8:00 - 22:00)</span>
+              <span>Hotline CSKH: <strong className="text-white font-mono">1900 6408</strong> (8:00 - 22:00)</span>
             </div>
-
-            <span className="text-slate-700">|</span>
-
-            <Link
-              href="/admin"
-              className="text-emerald-400 hover:text-emerald-300 font-semibold flex items-center space-x-1 transition-colors"
-            >
-              <Layers className="w-3 h-3" />
-              <span>Kênh Đối Tác / Quản Trị</span>
-            </Link>
           </div>
         </div>
       </div>
@@ -293,18 +276,10 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
 
           <div className="pt-2 border-t border-slate-800 space-y-2">
-            <div className="flex items-center justify-between text-xs text-slate-400 px-3">
+            <div className="flex items-center justify-between text-xs text-slate-400 px-3 py-1">
               <span>Hotline hỗ trợ:</span>
-              <span className="font-mono font-bold text-white">1900 6408</span>
+              <span className="font-mono font-bold text-emerald-400">1900 6408 (8:00 - 22:00)</span>
             </div>
-            <Link
-              href="/admin"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="w-full py-2.5 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center space-x-2 text-xs font-bold text-emerald-400 hover:bg-slate-800 transition-colors"
-            >
-              <Layers className="w-4 h-4" />
-              <span>Truy Cập Trang Quản Trị / Thiết Kế Sơ Đồ</span>
-            </Link>
           </div>
         </div>
       )}

@@ -202,10 +202,14 @@ export default function Home() {
 
   const selectedSeatsList = seats.filter((s) => selectedSeatIds.includes(s.seat_id));
 
-  // Handler khi click vào 1 sự kiện trên Trang chủ -> chuyển sang màn hình Chi Tiết qua Router
+  // Handler khi click vào 1 sự kiện trên Trang chủ -> chuyển sang màn hình Chi Tiết qua Router tách biệt
   const handleSelectEventFromHome = (event: EntertainmentEvent) => {
     const id = event.movie_id || event.event_id;
-    router.push(`/events/${id}`);
+    if (event.category === 'movie') {
+      router.push(`/movies/${id}`);
+    } else {
+      router.push(`/events/${id}`);
+    }
   };
 
   // Handler khi từ màn hình Chi Tiết -> chuyển sang màn hình Chọn Ghế qua Router

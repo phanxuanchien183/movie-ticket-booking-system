@@ -2,11 +2,13 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'CineTicket Pro - Nền Tảng Đặt Vé Xem Phim & Concert Toàn Diện',
+  title: 'CineTicket - Nền Tảng Đặt Vé Xem Phim & Vé Concert Hàng Đầu Việt Nam',
   description:
-    'Hệ thống thương mại đặt vé trực tuyến cao cấp cho cụm rạp chiếu phim CGV, Lotte và live concert, fan meeting tại các nhà thi đấu, sân vận động.',
+    'Hệ thống thương mại điện tử đặt vé cụm rạp CGV, Lotte, BHD và concert, fan meeting tại các nhà thi đấu, sân vận động quy mô lớn.',
   icons: {
-    icon: '/favicon.ico',
+    icon: '/icon.svg',
+    shortcut: '/icon.svg',
+    apple: '/icon.svg',
   },
 };
 

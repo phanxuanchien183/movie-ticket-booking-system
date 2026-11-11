@@ -35,6 +35,13 @@ function EventDetailContent() {
         }
 
         const currentEvent = eventData.data;
+
+        // Nếu sự kiện là phim chiếu rạp, tự động chuyển hướng sang đúng pathname /movies/[id]
+        if (currentEvent.category === 'movie') {
+          router.replace(`/movies/${eventId}`);
+          return;
+        }
+
         setEvent(currentEvent);
 
         // 2. Tải danh sách suất chiếu của sự kiện

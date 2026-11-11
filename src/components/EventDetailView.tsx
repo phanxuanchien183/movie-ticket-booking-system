@@ -272,23 +272,34 @@ export const EventDetailView: React.FC<EventDetailViewProps> = ({
               </div>
             )}
 
-            {/* Venue & Event Dates */}
-            <div className="p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800 max-w-xl space-y-1.5 text-xs text-slate-300 text-left">
-              <div className="flex items-center space-x-2 font-bold text-white">
-                <MapPin className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>{event.venue_name}</span>
+            {/* Venue & Event Dates - Chỉ hiển thị cho Concert / Meeting có địa điểm tổ chức cố định (Hình 1 yêu cầu bỏ đối với rạp phim) */}
+            {isConcert && (
+              <div className="p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800 max-w-xl space-y-1.5 text-xs text-slate-300 text-left">
+                <div className="flex items-center space-x-2 font-bold text-white">
+                  <MapPin className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <span>{event.venue_name}</span>
+                </div>
+                {event.venue_address && (
+                  <div className="text-slate-400 pl-6 text-[11px]">{event.venue_address}</div>
+                )}
+                <div className="flex items-center space-x-2 text-slate-300 pl-6 pt-0.5">
+                  <Calendar className="w-3.5 h-3.5 text-rose-400 shrink-0" />
+                  <span className="font-semibold">{event.event_dates}</span>
+                </div>
               </div>
-              <div className="text-slate-400 pl-6 text-[11px]">{event.venue_address}</div>
-              <div className="flex items-center space-x-2 text-slate-300 pl-6 pt-0.5">
-                <Calendar className="w-3.5 h-3.5 text-rose-400 shrink-0" />
-                <span className="font-semibold">{event.event_dates}</span>
-              </div>
-            </div>
+            )}
 
-            {/* Description */}
-            <p className="text-xs sm:text-sm text-slate-300 max-w-2xl leading-relaxed">
-              {event.description}
-            </p>
+            {/* Description / Tóm tắt nội dung phim - Hiển thị rộng rãi & nổi bật thay thế vị trí khoanh đỏ */}
+            <div className={`space-y-1.5 ${!isConcert ? 'pt-1 max-w-2xl text-left' : 'max-w-2xl text-left'}`}>
+              {!isConcert && (
+                <span className="text-[11px] font-extrabold uppercase tracking-wider text-emerald-400 block">
+                  Tóm tắt nội dung phim
+                </span>
+              )}
+              <p className="text-xs sm:text-sm text-slate-200 leading-relaxed">
+                {event.description}
+              </p>
+            </div>
           </div>
         </div>
       </div>
@@ -857,7 +868,7 @@ export const EventDetailView: React.FC<EventDetailViewProps> = ({
                     : 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700'
                 }`}
               >
-                <span>Vào Sơ Đồ Rạp &amp; Chọn Ghế Ngồi</span>
+                <span>Vào Sơ Đồ Rạp & Chọn Ghế Ngồi</span>
                 <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </button>
             </div>

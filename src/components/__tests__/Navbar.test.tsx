@@ -35,7 +35,7 @@ describe('Navbar Component (Commercial Navigation Menu)', () => {
     // Mở mobile menu
     fireEvent.click(toggleBtn);
     expect(screen.getByText('Danh Mục Đặt Vé')).toBeDefined();
-    expect(screen.getByText('Truy Cập Trang Quản Trị / Thiết Kế Sơ Đồ')).toBeDefined();
+    expect(screen.getByText('Hotline hỗ trợ:')).toBeDefined();
   });
 });
 

@@ -180,7 +180,15 @@ function BookingContent() {
 
   const handleBackToDetail = () => {
     if (showtime?.movie_id) {
-      router.push(`/events/${showtime.movie_id}`);
+      const isConcert =
+        showtime.room?.is_concert_stage ||
+        showtime.movie?.category === 'concert' ||
+        showtime.movie?.category === 'meeting';
+      if (isConcert) {
+        router.push(`/events/${showtime.movie_id}`);
+      } else {
+        router.push(`/movies/${showtime.movie_id}`);
+      }
     } else {
       router.back();
     }
