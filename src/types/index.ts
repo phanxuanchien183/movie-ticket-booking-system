@@ -171,3 +171,127 @@ export interface SeatGeometricView {
     badge_variant: 'success' | 'warning' | 'info' | 'secondary';
   };
 }
+
+// ==========================================
+// ADMIN PORTAL TYPES (ĐẠI NHẠC HỘI & RẠP CHIẾU PHIM)
+// ==========================================
+
+export interface AdminConcertCategory {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
+  eventsCount: number;
+  iconName?: string;
+  status: 'active' | 'inactive';
+}
+
+export interface AdminConcertEvent {
+  id: string;
+  title: string;
+  categoryId: string;
+  categoryName: string;
+  artists: string;
+  venueId: string;
+  venueName: string;
+  isIndoor: boolean;
+  eventDates: string;
+  timeSlot: string;
+  priceFrom: number;
+  totalCapacity: number;
+  ticketsSold: number;
+  status: 'NowShowing' | 'SellingFast' | 'ComingSoon' | 'SoldOut';
+  bannerUrl: string;
+  posterUrl: string;
+}
+
+export interface AdminConcertVenue {
+  id: string;
+  name: string;
+  environment: 'indoor' | 'outdoor';
+  address: string;
+  district: string;
+  city: string;
+  capacity: number;
+  description: string;
+  stageFormat: string;
+}
+
+export interface AdminCinemaChain {
+  id: string;
+  code: string;
+  name: string;
+  logo: string;
+  hotline: string;
+  website: string;
+  branchesCount: number;
+  description: string;
+}
+
+export interface AdminCinemaBranch {
+  id: string;
+  chainId: string;
+  chainName: string;
+  branchName: string;
+  city: string;
+  district: string;
+  address: string;
+  phone: string;
+  roomsCount: number;
+  status: 'active' | 'renovating';
+}
+
+export interface AdminCinemaAddress {
+  id: string;
+  branchId: string;
+  branchName: string;
+  chainName: string;
+  city: string;
+  district: string;
+  fullAddress: string;
+  hotline: string;
+  googleMapQuery: string;
+}
+
+export interface AdminCinemaRoom {
+  id: string;
+  branchId: string;
+  branchName: string;
+  roomName: string;
+  roomType: 'Laser IMAX' | 'Standard 2D' | 'Gold Class VIP' | '4DX Motion' | 'ScreenX 270';
+  screenWidth: number;   // meters, e.g. 22m for IMAX
+  screenHeight: number;  // meters, e.g. 16m for IMAX
+  distanceToRowA: number;// meters, e.g. 5m
+  totalRows: number;
+  seatsPerRow: number;
+  totalSeats: number;
+  soundSystem: string;   // e.g. 'Dolby Atmos 64 kênh'
+}
+
+export interface AdminCinemaSeatConfig {
+  rowName: string;
+  seatCount: number;
+  seatType: 'standard' | 'vip' | 'sweetbox' | 'disabled';
+  price: number;
+  hasAisleAfter?: number[]; // e.g. [4, 10]
+}
+
+export interface AdminMovieMgmt {
+  id: number;
+  title: string;
+  bannerUrl: string;
+  posterUrl: string;
+  trailerYoutubeId: string;
+  trailerUrl?: string;
+  description: string;
+  ratingScore: string;
+  ratingImdb: string;
+  ageRating: string;
+  durationMinutes: number;
+  director: string;
+  cast: string;
+  genre: string;
+  releaseDate: string;
+  status: 'NowShowing' | 'ComingSoon';
+}
+

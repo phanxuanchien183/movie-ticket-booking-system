@@ -395,12 +395,20 @@ export const StageZoneDesigner: React.FC<StageZoneDesignerProps> = ({ onSaveLayo
             </div>
           </div>
 
-          {/* INTERACTIVE CANVAS CONTENT */}
+          {/* INTERACTIVE CANVAS CONTENT (Konva.js Container Architecture) */}
           <div className="flex-1 p-6 flex flex-col items-center justify-center overflow-auto min-h-[560px] bg-[#07090e]">
             <div
-              style={{ transform: `scale(${zoomLevel / 100})`, transformOrigin: 'top center' }}
-              className="w-full max-w-[760px] transition-transform duration-200 space-y-4"
+              className="konvajs-content"
+              role="presentation"
+              style={{
+                position: 'relative',
+                userSelect: 'none',
+                width: '100%',
+                transform: `scale(${zoomLevel / 100})`,
+                transformOrigin: 'top center',
+              }}
             >
+              <div className="w-full max-w-[760px] mx-auto transition-transform duration-200 space-y-4">
               {/* CANVAS SUB-CATEGORY 1: CONCERT T-STAGE */}
               {subCategory === 'concert' ? (
                 <div className="space-y-4 select-none">
@@ -732,6 +740,7 @@ export const StageZoneDesigner: React.FC<StageZoneDesignerProps> = ({ onSaveLayo
                   </div>
                 </div>
               )}
+              </div>
             </div>
           </div>
         </div>
