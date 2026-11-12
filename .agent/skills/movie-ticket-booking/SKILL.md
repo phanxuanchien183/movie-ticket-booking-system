@@ -1,6 +1,6 @@
 ---
 name: movie-ticket-booking
-description: "Universal Agent Skill for Movie & Event Ticket Booking System (Next.js fullstack, Redis seat locking, Seat View Engine 3D trigonometry, bank binding promotions, MySQL schema, and mandatory testing policies)."
+description: "Universal Agent Skill for Movie & Event Ticket Booking System (Next.js 16 fullstack, Route Separation /movies & /events, Redis seat locking, 360° Pan-Tilt Look-Around Seat View, Konva.js Canvas Stage Designer, Comprehensive Admin Portal for Concerts & Cinemas, MySQL schema, and mandatory testing policies)."
 ---
 
 # 🤖 MOVIE & EVENT TICKET BOOKING SYSTEM - AGENT SKILL SPECIFICATION
@@ -23,40 +23,47 @@ movie-ticket-booking/
 ├── src/
 │   ├── app/
 │   │   ├── api/                    # Route Handlers Next.js
-│   │   │   ├── movies/             # GET /api/movies
+│   │   │   ├── movies/             # GET /api/movies & /[id]
 │   │   │   ├── showtimes/          # GET /api/showtimes & /[id]/seats
-│   │   │   ├── seats/lock/         # POST /api/seats/lock
+│   │   │   ├── seats/lock/         # POST /api/seats/lock (Redis TTL 300s)
 │   │   │   ├── seats/release/      # POST /api/seats/release
-│   │   │   ├── promotions/validate/# POST /api/promotions/validate
+│   │   │   ├── promotions/validate/# POST /api/promotions/validate (Bank binding)
 │   │   │   └── bookings/checkout/  # POST /api/bookings/checkout & /[id]
-│   │   ├── admin/                  # Giao diện Admin Portal (/admin)
-│   │   ├── layout.tsx              # Root HTML & metadata
-│   │   └── page.tsx                # Client interactive booking application (CineBox)
+│   │   ├── admin/                  # Cổng Quản Trị Hệ Thống (/admin)
+│   │   │   ├── page.tsx            # Bố cục 3 phần chuẩn Admin (Header, Menu, Content)
+│   │   │   └── __tests__/AdminPage.test.tsx
+│   │   ├── movies/[id]/            # Luồng xem phim rạp: trailer, rating, chọn chi nhánh rạp & suất chiếu
+│   │   ├── events/[id]/            # Luồng đại nhạc hội: chi tiết concert, nghệ sĩ, hạng vé, nội quy
+│   │   ├── booking/[showtimeId]/   # Sơ đồ rạp chiếu hoặc sân khấu Ticketbox tương tác
+│   │   │   └── checkout/           # Bảng câu hỏi & thông tin xuất hóa đơn Ticketbox
+│   │   ├── layout.tsx              # Root HTML, Fonts & Metadata
+│   │   ├── page.tsx                # Trang chủ ứng dụng đặt vé
+│   │   └── icon.svg                # Browser favicon custom
 │   ├── components/                 # React UI Components
-│   │   ├── Navbar.tsx              # Thanh điều hướng thương mại CineBox
+│   │   ├── admin/                  # Bộ module quản trị Admin
+│   │   │   ├── KonvaCanvasStageDesigner.tsx # Trình thiết kế sân khấu Konva Canvas đa tầng
+│   │   │   ├── CinemaSeatViewSimulator.tsx  # Góc nhìn Seat View 360° xoay chuột (Pan-Tilt)
+│   │   │   ├── ConcertAdminModules.tsx      # Quản lý sự kiện, danh mục, địa điểm Trong/Ngoài trời
+│   │   │   ├── CinemaAdminModules.tsx       # Quản lý chuỗi rạp, chi nhánh, phòng chiếu, phim
+│   │   │   └── StageZoneDesigner.tsx        # Trình thiết kế sơ đồ & hạng vé (Mục 1 & 2)
+│   │   ├── Navbar.tsx              # Thanh điều hướng thương mại người dùng
 │   │   ├── MovieSelector.tsx       # Lựa chọn phim & phân loại
-│   │   ├── ShowtimeSelector.tsx    # Lịch chiếu & định dạng suất chiếu
-│   │   ├── SeatMap.tsx             # Sơ đồ ghế thời gian thực (Real-time Heartbeat Polling)
-│   │   ├── SeatViewModal.tsx       # Canvas mô phỏng góc nhìn rạp chiếu
+│   │   ├── EventDetailView.tsx     # Chi tiết sự kiện concert
+│   │   ├── TicketboxStageMap.tsx   # Sơ đồ sân khấu phong cách Ticketbox
+│   │   ├── SeatMap.tsx             # Sơ đồ ghế rạp chiếu phim
+│   │   ├── SeatViewModal.tsx       # Modal góc nhìn ghế 3D
 │   │   ├── CheckoutDrawer.tsx      # Form thanh toán & kiểm tra ngân hàng
-│   │   ├── TicketSuccessModal.tsx  # Vé điện tử E-Ticket & mã QR
-│   │   └── __tests__/              # Unit & Integration Tests cho Components
-│   │       ├── MovieSelector.test.tsx
-│   │       ├── ShowtimeSelector.test.tsx
-│   │       └── SeatMap.test.tsx
+│   │   └── TicketSuccessModal.tsx  # Vé điện tử E-Ticket & mã QR
 │   ├── lib/
 │   │   ├── db.ts                   # mysql2 connection pool + In-Memory Fallback
 │   │   ├── redis.ts                # ioredis client + In-Memory TTL Lock Manager
-│   │   ├── seat-view-engine.ts     # Công thức hình học khoảng cách & góc nhìn
-│   │   └── __tests__/
-│   │       └── seat-view-engine.test.ts # Tests cho công thức lượng giác
+│   │   ├── seat-view-engine.ts     # Công thức hình học khoảng cách & góc nhìn THX/SMPTE
+│   │   └── __tests__/seat-view-engine.test.ts
 │   ├── schemas/                    # Zod validation schemas
 │   ├── services/                   # Business domain services
 │   │   ├── seat-lock.service.ts    # Redis lock logic & batch rollback
 │   │   ├── promotion.service.ts    # Strict bank binding validator
 │   │   └── __tests__/
-│   │       ├── seat-lock.service.test.ts # Tests cho khóa ghế & race-condition
-│   │       └── promotion.service.test.ts # Tests cho ràng buộc ngân hàng
 │   └── types/                      # TypeScript domain types & interfaces
 ├── vitest.config.ts                # Cấu hình test runner Vitest + React Testing Library
 ├── docs/                           # Tài liệu kỹ thuật chi tiết
@@ -66,31 +73,47 @@ movie-ticket-booking/
 
 ---
 
-## 2. Quy Tắc Cốt Lõi Khi Lập Trình & Can Thiệp Codebase
+## 2. Quy Chuẩn Vận Hành Hai Lĩnh Vực Cốt Lõi
+
+### Lĩnh Vực 1: Đại Nhạc Hội & Sự Kiện Biểu Diễn (Concerts & Live Events)
+1. **Phân Luồng Riêng Biệt (`/events/[id]`):** Không dùng chung route với phim chiếu rạp. Đường dẫn hiển thị rõ thông tin ban tổ chức, danh sách nghệ sĩ, thời gian và địa điểm.
+2. **Sơ Đồ Phân Khu Ticketbox (`TicketboxStageMap.tsx`):** Hiển thị sân khấu trung tâm (Main Stage, T-Stage, Runway), phân khu vé đứng (Fanzone A/B, GA 1/2) và vé ngồi (Sky Lounge, SVIP, VIP, CAT 1/2/3).
+3. **Bảng Câu Hỏi & Thanh Toán (`/booking/[id]/checkout`):** Tuân thủ quy chuẩn Ticketbox gồm các điều khoản Ban tổ chức, thông tin cá nhân và xuất hóa đơn VAT.
+4. **Trình Thiết Kế Sân Khấu Konva.js Canvas (`KonvaCanvasStageDesigner.tsx`):** Container `<div class="konvajs-content" role="presentation">` đa tầng `<canvas>` cho phép kéo thả phân khu, cấu hình giá vé và sức chứa.
+
+### Lĩnh Vực 2: Rạp Chiếu Phim (Cinemas & Movie Theaters)
+1. **Phân Luồng Riêng Biệt (`/movies/[id]`):** Hiển thị trailer YouTube, điểm đánh giá khán giả/IMDb, nhãn độ tuổi (P, T16, T18), bộ chọn chuỗi rạp $\rightarrow$ chọn chi nhánh cụm rạp $\rightarrow$ khung giờ chiếu.
+2. **Phòng Chiếu & Ma Trận Ghế (`SeatMap.tsx` & `CinemaSeatDesigner.tsx`):** Hàng ghế A đến H, ghế Tiêu chuẩn (Standard), VIP trung tâm, Sweetbox đôi vách ngăn, lối đi Aisle.
+3. **Mô Phỏng Góc Nhìn 360° Xoay Chuột (`CinemaSeatViewSimulator.tsx`):**
+   - Hỗ trợ thao tác chuột kéo rê trực tiếp trên màn hình chiếu (Pan-Tilt Look-Around Camera: Yaw -180° đến +180°, Pitch -40° đến +40°).
+   - Mô phỏng màn hình cong Laser IMAX, trần rạp kèm loa âm thanh vòm Dolby Atmos, cửa thoát hiểm EXIT và các hàng ghế xung quanh.
+   - Bảng chỉ số quang học thực tế chuẩn SMPTE & THX: Khoảng cách màn hình (m), góc ngẩng cổ (Vertical Elevation Angle $\le 35^\circ$), góc lệch tâm ngang và phân loại *Golden Seat*.
+
+---
+
+## 3. Quy Tắc Cốt Lõi Khi Can Thiệp Codebase
 
 ### Quy Tắc 1: Bảo Toàn Tính Nguyên Tử Của Redis Lock
 * **Key Pattern Bắt Buộc:** `lock:showtime:{showtime_id}:seat:{seat_id}`
 * **Lệnh Khóa:** `SET key userId NX EX 300` (TTL cố định 300 giây).
 * **Rollback Bắt Buộc:** Khi khóa danh sách nhiều ghế trong `seat-lock.service.ts`, nếu có bất kỳ ghế nào trả về `nil` (đã bị người khác khóa), Agent **phải giải phóng toàn bộ các ghế đã khóa thành công trước đó** trong cùng một transaction.
-* **Auto-fallback:** Không được xóa bỏ lớp `InMemoryLockManager` trong `src/lib/redis.ts` vì nó đảm bảo dự án chạy được trên môi trường dev không có Redis.
+* **Auto-fallback:** Không được xóa bỏ lớp `InMemoryLockManager` trong `src/lib/redis.ts`.
 
 ### Quy Tắc 2: Kiểm Duyệt Ràng Buộc Ngân Hàng Tuyệt Đối (Bank Binding Check)
 * Khi xử lý mã giảm giá trong `src/services/promotion.service.ts`:
   * Nếu `promotion.bank_code` có giá trị (VD: `"ACB"`), phải so sánh với `payment_method`.
-  * Nếu phương thức thanh toán **không chứa** chuỗi mã ngân hàng (so sánh không phân biệt hoa thường) $\rightarrow$ Bắt buộc ném lỗi `INVALID_BANK_PAYMENT_METHOD`.
-  * Không cho phép bypass hoặc bỏ qua bước kiểm tra này trong API Checkout.
+  * Nếu phương thức thanh toán **không chứa** chuỗi mã ngân hàng $\rightarrow$ Bắt buộc ném lỗi `INVALID_BANK_PAYMENT_METHOD`.
 
-### Quy Tắc 3: Tính Toán Tầm Nhìn Ghế Đúng Chuẩn Lượng Giác
+### Quy Tắc 3: Tính Toán Tầm Nhìn Ghế Đúng Chuẩn Lượng Giác & SMPTE/THX
 * Khi tính toán góc nhìn trong `src/lib/seat-view-engine.ts`:
   * Khoảng cách đến tâm màn hình:
     $$\text{Distance} = \sqrt{\left(X_{\text{seat}} - \frac{\text{screenWidth}}{2}\right)^2 + Y_{\text{seat}}^2}$$
   * Góc lệch ngang:
     $$\text{Angle} = \arctan\left(\frac{X_{\text{seat}} - \frac{\text{screenWidth}}{2}}{Y_{\text{seat}}}\right) \times \frac{180}{\pi}$$
-  * Giữ nguyên phân cấp đánh giá chất lượng vị trí ghế:
-    * $|\text{Angle}| \le 8^\circ$: Ghế trung tâm Hoàng Kim (5 sao)
-    * $8^\circ < |\text{Angle}| \le 18^\circ$: Ghế tiêu chuẩn tốt (4.5 sao)
-    * $18^\circ < |\text{Angle}| \le 28^\circ$: Ghế góc cánh bên (3.5 sao)
-    * $> 28^\circ$: Ghế góc rìa (3 sao)
+  * Đánh giá tiêu chuẩn:
+    * $|\text{Angle}| \le 8^\circ$: Ghế trung tâm Hoàng Kim (Golden Seat - 5 sao).
+    * $8^\circ < |\text{Angle}| \le 18^\circ$: Ghế tiêu chuẩn tốt chuẩn THX.
+    * Góc ngẩng cổ $\le 35^\circ$ theo khuyến nghị SMPTE.
 
 ### Quy Tắc 4: Toàn Vẹn Giao Dịch Đặt Vé (ACID Transaction)
 * Khi gọi `db.createBooking`:
@@ -100,22 +123,16 @@ movie-ticket-booking/
 
 ---
 
-## 3. Chính Sách Bắt Buộc Về Kiểm Thử (MANDATORY TESTING POLICY)
+## 4. Chính Sách Bắt Buộc Về Kiểm Thử (MANDATORY TESTING POLICY)
 
-> ⚠️ **ĐIỀU KHOẢN BẮT BUỘC CHO MỌI AGENT VÀ DEVELOPER:**
-> 1. **Mọi chức năng mới** (API, Service, Utility) đều **bắt buộc phải có file test unit/integration** tương ứng đặt trong thư mục `__tests__/` cùng cấp (ví dụ: `src/services/__tests__/<tên-service>.test.ts`).
-> 2. **Mọi màn hình hoặc UI component mới** (Screen, Drawer, Modal, Card) đều **bắt buộc phải có file test component** sử dụng Vitest và `@testing-library/react` (ví dụ: `src/components/__tests__/<TênComponent>.test.tsx`).
-> 3. **Trước khi hoàn tất bất kỳ lượt can thiệp nào**, Agent **bắt buộc phải chạy lệnh `npm test`** và đảm bảo 100% test cases đều pass (xanh lá). Không chấp nhận code đẩy lên nếu có test case bị fail!
-
-### Cấu Trúc Đặt File Test Chuẩn Hóa:
-* Domain Services: `src/services/__tests__/*.test.ts`
-* Library & Engine: `src/lib/__tests__/*.test.ts`
-* UI Components: `src/components/__tests__/*.test.tsx`
-* API Route Handlers: `src/app/api/**/__tests__/*.test.ts`
+> ⚠️ **ĐIỀU KHOẢN BẮT BUỘC:**
+> 1. Mọi chức năng mới (API, Service, Utility) đều **bắt buộc phải có file test unit/integration** tương ứng đặt trong thư mục `__tests__/` cùng cấp.
+> 2. Mọi màn hình hoặc UI component mới đều **bắt buộc phải có file test component** sử dụng Vitest và `@testing-library/react`.
+> 3. Trước khi hoàn tất bất kỳ lượt can thiệp nào, Agent **bắt buộc phải chạy lệnh `npm test`** và đảm bảo 100% test cases đều pass (xanh lá). Hiện tại dự án có **52/52 tests passing**.
 
 ---
 
-## 4. Các Lệnh Thao Tác Thường Dùng (Agent Operational Commands)
+## 5. Các Lệnh Thao Tác Thường Dùng (Agent Operational Commands)
 
 ### A. Chạy toàn bộ Test Suite (Bắt Buộc Trước Khi Hoàn Tất)
 ```bash
@@ -137,12 +154,7 @@ npm run build
 npm run dev
 ```
 
-### E. Chạy migrations SQL vào MySQL
-```bash
-npm run db:migrate
-```
-
-### F. Khởi động với Docker Compose
+### E. Khởi động với Docker Compose
 ```bash
 docker compose up -d --build
 ```

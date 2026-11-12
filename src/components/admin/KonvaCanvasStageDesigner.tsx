@@ -799,3 +799,4 @@ export const KonvaCanvasStageDesigner: React.FC = () => {
     </div>
   );
 };
+

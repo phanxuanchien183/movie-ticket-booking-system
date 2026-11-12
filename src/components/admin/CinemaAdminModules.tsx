@@ -788,3 +788,4 @@ export const MoviesManager: React.FC = () => {
     </div>
   );
 };
+
